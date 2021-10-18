@@ -29,6 +29,9 @@ namespace OdooIntegration.ConsoleApp
             var odooClient = new OdooClient(config);
             var versionResult = await odooClient.GetVersionAsync();
             Console.WriteLine(JsonConvert.SerializeObject(versionResult));
+
+
+
             Console.ReadKey();
         }
     }
