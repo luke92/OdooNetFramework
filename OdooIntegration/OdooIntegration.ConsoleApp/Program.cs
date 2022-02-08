@@ -25,6 +25,9 @@ namespace OdooIntegration.ConsoleApp
                 foreach(var arg in args)
                 {
                     PrintDotNetModel(odooClient, arg);
+
+                    Console.WriteLine("Press any key");
+                    Console.ReadKey();
                 }
             }
             else
@@ -43,7 +46,7 @@ namespace OdooIntegration.ConsoleApp
             }
             
 
-            Console.ReadKey();
+            
         }
 
         public static OdooClient GetClient()
@@ -166,6 +169,7 @@ namespace OdooIntegration.ConsoleApp
             var model = OdooModelMapper.GetDotNetModel(argument, modelResult.Value);
 
             Console.WriteLine(model);
+            Console.WriteLine();
         }
     }
 }
