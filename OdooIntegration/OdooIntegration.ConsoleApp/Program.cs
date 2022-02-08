@@ -34,6 +34,8 @@ namespace OdooIntegration.ConsoleApp
             {
                 await PrintVersion(odooClient);
 
+                await PrintIdentificationTypes(odooClient);
+
                 await PrintProducts(odooClient);
 
                 await PrintProducts2(odooClient);
@@ -72,7 +74,22 @@ namespace OdooIntegration.ConsoleApp
 
             var versionResult = await odooClient.GetVersionAsync();
             Console.WriteLine(JsonConvert.SerializeObject(versionResult));
+            Console.WriteLine("");
+        }
 
+        public async static Task PrintIdentificationTypes(OdooClient odooClient)
+        {
+            Console.WriteLine("Identification types");
+
+            var tableName = "l10n_latam.identification.type";
+            var modelResult = await odooClient.GetModelAsync(tableName);
+
+            var model = OdooModelMapper.GetDotNetModel(tableName, modelResult.Value);
+
+            var repository = new OdooRepository<L10nLatamIdentificationTypeOdooModel>(odooClient.Config);
+            var results = await repository.Query().ToListAsync();
+
+            Console.WriteLine(JsonConvert.SerializeObject(results));
             Console.WriteLine("");
         }
 
@@ -89,7 +106,6 @@ namespace OdooIntegration.ConsoleApp
             var results = await repository.Query().ToListAsync();
 
             Console.WriteLine(JsonConvert.SerializeObject(results));
-
             Console.WriteLine("");
         }
 
@@ -106,7 +122,6 @@ namespace OdooIntegration.ConsoleApp
             var results = await repository.Query().ToListAsync();
 
             Console.WriteLine(JsonConvert.SerializeObject(results));
-
             Console.WriteLine("");
         }
 
@@ -123,7 +138,6 @@ namespace OdooIntegration.ConsoleApp
             var results = await repository.Query().ToListAsync();
 
             Console.WriteLine(JsonConvert.SerializeObject(results));
-
             Console.WriteLine("");
         }
 
@@ -140,7 +154,6 @@ namespace OdooIntegration.ConsoleApp
             var results = await repository.Query().ToListAsync();
 
             Console.WriteLine(JsonConvert.SerializeObject(results));
-
             Console.WriteLine("");
         }
 
@@ -157,7 +170,6 @@ namespace OdooIntegration.ConsoleApp
             var results = await repository.Query().ToListAsync();
 
             Console.WriteLine(JsonConvert.SerializeObject(results));
-
             Console.WriteLine("");
         }
 

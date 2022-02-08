@@ -53,6 +53,7 @@
   <ItemGroup>
     <Compile Include="Models\AccountMoveOdooModel.cs" />
     <Compile Include="Models\AccountPaymentOdooModel.cs" />
+    <Compile Include="Models\L10nLatamIdentificationTypeOdooModel.cs" />
     <Compile Include="Models\ProductProductOdooModel.cs" />
     <Compile Include="Models\ProductTemplateOdooModel.cs" />
     <Compile Include="Models\ResPartnerOdooModel.cs" />
