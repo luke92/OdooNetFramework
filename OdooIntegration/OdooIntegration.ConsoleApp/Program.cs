@@ -20,17 +20,28 @@ namespace OdooIntegration.ConsoleApp
 
             var loginResult = await odooClient.LoginAsync();
 
-            await PrintVersion(odooClient);
+            if(args.Length > 0)
+            {
+                foreach(var arg in args)
+                {
+                    PrintDotNetModel(odooClient, arg);
+                }
+            }
+            else
+            {
+                await PrintVersion(odooClient);
 
-            await PrintProducts(odooClient);
+                await PrintProducts(odooClient);
 
-            await PrintProducts2(odooClient);
+                await PrintProducts2(odooClient);
 
-            await PrintCustomers(odooClient);
+                await PrintCustomers(odooClient);
 
-            await PrintInvoices(odooClient);
+                await PrintInvoices(odooClient);
 
-            await PrintPayments(odooClient);
+                await PrintPayments(odooClient);
+            }
+            
 
             Console.ReadKey();
         }
@@ -145,6 +156,16 @@ namespace OdooIntegration.ConsoleApp
             Console.WriteLine(JsonConvert.SerializeObject(results));
 
             Console.WriteLine("");
+        }
+
+        public async static Task PrintDotNetModel(OdooClient odooClient, string argument)
+        {
+            Console.WriteLine(argument);
+
+            var modelResult = await odooClient.GetModelAsync(argument);
+            var model = OdooModelMapper.GetDotNetModel(argument, modelResult.Value);
+
+            Console.WriteLine(model);
         }
     }
 }
