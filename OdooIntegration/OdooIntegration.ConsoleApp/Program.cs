@@ -18,16 +18,13 @@ namespace OdooIntegration.ConsoleApp
         {
             var odooClient = GetClient();
 
-            var loginResult = await odooClient.LoginAsync();
+            await PrintLogin(odooClient);
 
             if(args.Length > 0)
             {
                 foreach(var arg in args)
                 {
                     PrintDotNetModel(odooClient, arg);
-
-                    Console.WriteLine("Press any key");
-                    Console.ReadKey();
                 }
             }
             else
@@ -46,9 +43,8 @@ namespace OdooIntegration.ConsoleApp
 
                 await PrintPayments(odooClient);
             }
-            
-
-            
+            Console.WriteLine("Press any key");
+            Console.ReadKey();
         }
 
         public static OdooClient GetClient()
@@ -67,89 +63,124 @@ namespace OdooIntegration.ConsoleApp
 
             return new OdooClient(config);
         }
+
+        public async static Task PrintLogin(OdooClient odooClient)
+        {
+            Console.WriteLine("Login");
+            try
+            {
+                var loginResult = await odooClient.LoginAsync();
+                Console.WriteLine(JsonConvert.SerializeObject(loginResult));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+            Console.WriteLine("");
+
+        }
         
         public async static Task PrintVersion(OdooClient odooClient)
         {
             Console.WriteLine("Version");
-
-            var versionResult = await odooClient.GetVersionAsync();
-            Console.WriteLine(JsonConvert.SerializeObject(versionResult));
+            try
+            {
+                var versionResult = await odooClient.GetVersionAsync();
+                Console.WriteLine(JsonConvert.SerializeObject(versionResult));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+            
             Console.WriteLine("");
         }
 
         public async static Task PrintIdentificationTypes(OdooClient odooClient)
         {
             Console.WriteLine("Identification types");
-
-            var tableName = "l10n_latam.identification.type";
-            var modelResult = await odooClient.GetModelAsync(tableName);
-
-            var model = OdooModelMapper.GetDotNetModel(tableName, modelResult.Value);
-
-            var repository = new OdooRepository<L10nLatamIdentificationTypeOdooModel>(odooClient.Config);
-            var results = await repository.Query().ToListAsync();
-
-            Console.WriteLine(JsonConvert.SerializeObject(results));
+            try
+            {
+                var tableName = "l10n_latam.identification.type";
+                var repository = new OdooRepository<L10nLatamIdentificationTypeOdooModel>(odooClient.Config);
+                var results = await repository.Query().ToListAsync();
+                Console.WriteLine(JsonConvert.SerializeObject(results));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+            
             Console.WriteLine("");
         }
 
         public async static Task PrintProducts(OdooClient odooClient)
         {
             Console.WriteLine("Products");
+            try
+            {
+                var tableName = "product.product";
+                var repository = new OdooRepository<ProductProductOdooModel>(odooClient.Config);
+                var results = await repository.Query().ToListAsync();
 
-            var tableName = "product.product";
-            var modelResult = await odooClient.GetModelAsync(tableName);
-
-            var model = OdooModelMapper.GetDotNetModel(tableName, modelResult.Value);
-
-            var repository = new OdooRepository<ProductProductOdooModel>(odooClient.Config);
-            var results = await repository.Query().ToListAsync();
-
-            Console.WriteLine(JsonConvert.SerializeObject(results));
+                Console.WriteLine(JsonConvert.SerializeObject(results));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }            
             Console.WriteLine("");
         }
 
         public async static Task PrintProducts2(OdooClient odooClient)
         {
             Console.WriteLine("Products2");
-
-            var tableName = "product.template";
-            var modelResult = await odooClient.GetModelAsync(tableName);
-
-            var model = OdooModelMapper.GetDotNetModel(tableName, modelResult.Value);
-
-            var repository = new OdooRepository<ProductTemplateOdooModel>(odooClient.Config);
-            var results = await repository.Query().ToListAsync();
-
-            Console.WriteLine(JsonConvert.SerializeObject(results));
+            try
+            {
+                var tableName = "product.template";
+                var repository = new OdooRepository<ProductTemplateOdooModel>(odooClient.Config);
+                var results = await repository.Query().ToListAsync();
+                Console.WriteLine(JsonConvert.SerializeObject(results));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+            
             Console.WriteLine("");
         }
 
         public async static Task PrintCustomers(OdooClient odooClient)
         {
             Console.WriteLine("Customers");
+            try
+            {
+                var tableName = "res.partner";
+                var repository = new OdooRepository<ResPartnerOdooModel>(odooClient.Config);
+                var results = await repository.Query().ToListAsync();
 
-            var tableName = "res.partner";
-            var modelResult = await odooClient.GetModelAsync(tableName);
-
-            var model = OdooModelMapper.GetDotNetModel(tableName, modelResult.Value);
-
-            var repository = new OdooRepository<ResPartnerOdooModel>(odooClient.Config);
-            var results = await repository.Query().ToListAsync();
-
-            Console.WriteLine(JsonConvert.SerializeObject(results));
+                Console.WriteLine(JsonConvert.SerializeObject(results));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+            
             Console.WriteLine("");
         }
 
         public async static Task PrintInvoices(OdooClient odooClient)
         {
             Console.WriteLine("Invoices");
+            try
+            {
 
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
             var tableName = "account.move";
-            var modelResult = await odooClient.GetModelAsync(tableName);
-
-            var model = OdooModelMapper.GetDotNetModel(tableName, modelResult.Value);
-
             var repository = new OdooRepository<AccountMoveOdooModel>(odooClient.Config);
             var results = await repository.Query().ToListAsync();
 
@@ -160,27 +191,35 @@ namespace OdooIntegration.ConsoleApp
         public async static Task PrintPayments(OdooClient odooClient)
         {
             Console.WriteLine("Payments");
+            try
+            {
+                var tableName = "account.payment";
+                var repository = new OdooRepository<AccountPaymentOdooModel>(odooClient.Config);
+                var results = await repository.Query().ToListAsync();
 
-            var tableName = "account.payment";
-            var modelResult = await odooClient.GetModelAsync(tableName);
-
-            var model = OdooModelMapper.GetDotNetModel(tableName, modelResult.Value);
-
-            var repository = new OdooRepository<AccountPaymentOdooModel>(odooClient.Config);
-            var results = await repository.Query().ToListAsync();
-
-            Console.WriteLine(JsonConvert.SerializeObject(results));
+                Console.WriteLine(JsonConvert.SerializeObject(results));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+            
             Console.WriteLine("");
         }
 
         public async static Task PrintDotNetModel(OdooClient odooClient, string argument)
         {
             Console.WriteLine(argument);
-
-            var modelResult = await odooClient.GetModelAsync(argument);
-            var model = OdooModelMapper.GetDotNetModel(argument, modelResult.Value);
-
-            Console.WriteLine(model);
+            try
+            {
+                var modelResult = await odooClient.GetModelAsync(argument);
+                var model = OdooModelMapper.GetDotNetModel(argument, modelResult.Value);
+                Console.WriteLine(model);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }            
             Console.WriteLine();
         }
     }
