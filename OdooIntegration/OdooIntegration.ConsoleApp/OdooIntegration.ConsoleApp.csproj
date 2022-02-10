@@ -51,8 +51,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Helpers\OdooHelper.cs" />
+    <Compile Include="Models\AccountAnalyticAccountOdooModel.cs" />
     <Compile Include="Models\AccountMoveOdooModel.cs" />
     <Compile Include="Models\AccountPaymentOdooModel.cs" />
+    <Compile Include="Models\FleetVehicleOdooModel.cs" />
     <Compile Include="Models\L10nLatamIdentificationTypeOdooModel.cs" />
     <Compile Include="Models\ProductProductOdooModel.cs" />
     <Compile Include="Models\ProductTemplateOdooModel.cs" />

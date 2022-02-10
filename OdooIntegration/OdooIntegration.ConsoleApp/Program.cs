@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using OdooIntegration.ConsoleApp.Helpers;
 using OdooIntegration.ConsoleApp.Models;
 using PortaCapena.OdooJsonRpcClient;
 using PortaCapena.OdooJsonRpcClient.Converters;
@@ -24,7 +25,7 @@ namespace OdooIntegration.ConsoleApp
             {
                 foreach(var arg in args)
                 {
-                    PrintDotNetModel(odooClient, arg);
+                    OdooHelper.PrintDotNetModel(odooClient, arg);
                 }
             }
             else
@@ -42,6 +43,10 @@ namespace OdooIntegration.ConsoleApp
                 await PrintInvoices(odooClient);
 
                 await PrintPayments(odooClient);
+
+                await PrintVehicleFleet(odooClient);
+
+                await PrintAccountAnalytics(odooClient);
             }
             Console.WriteLine("Press any key");
             Console.ReadKey();
@@ -101,10 +106,9 @@ namespace OdooIntegration.ConsoleApp
             Console.WriteLine("Identification types");
             try
             {
-                var tableName = "l10n_latam.identification.type";
                 var repository = new OdooRepository<L10nLatamIdentificationTypeOdooModel>(odooClient.Config);
-                var results = await repository.Query().ToListAsync();
-                Console.WriteLine(JsonConvert.SerializeObject(results));
+                var json = await OdooHelper.GetJsonRepositoryResults(repository);
+                Console.WriteLine(json);
             }
             catch (Exception ex)
             {
@@ -119,11 +123,9 @@ namespace OdooIntegration.ConsoleApp
             Console.WriteLine("Products");
             try
             {
-                var tableName = "product.product";
                 var repository = new OdooRepository<ProductProductOdooModel>(odooClient.Config);
-                var results = await repository.Query().ToListAsync();
-
-                Console.WriteLine(JsonConvert.SerializeObject(results));
+                var json = await OdooHelper.GetJsonRepositoryResult(repository);
+                Console.WriteLine(json);
             }
             catch (Exception ex)
             {
@@ -137,10 +139,9 @@ namespace OdooIntegration.ConsoleApp
             Console.WriteLine("Products2");
             try
             {
-                var tableName = "product.template";
                 var repository = new OdooRepository<ProductTemplateOdooModel>(odooClient.Config);
-                var results = await repository.Query().ToListAsync();
-                Console.WriteLine(JsonConvert.SerializeObject(results));
+                var json = await OdooHelper.GetJsonRepositoryResult(repository);
+                Console.WriteLine(json);
             }
             catch (Exception ex)
             {
@@ -155,11 +156,9 @@ namespace OdooIntegration.ConsoleApp
             Console.WriteLine("Customers");
             try
             {
-                var tableName = "res.partner";
                 var repository = new OdooRepository<ResPartnerOdooModel>(odooClient.Config);
-                var results = await repository.Query().ToListAsync();
-
-                Console.WriteLine(JsonConvert.SerializeObject(results));
+                var json = await OdooHelper.GetJsonRepositoryResult(repository);
+                Console.WriteLine(json);
             }
             catch (Exception ex)
             {
@@ -174,30 +173,10 @@ namespace OdooIntegration.ConsoleApp
             Console.WriteLine("Invoices");
             try
             {
+                var repository = new OdooRepository<AccountMoveOdooModel>(odooClient.Config);
+                var json = await OdooHelper.GetJsonRepositoryResult(repository);
+                Console.WriteLine(json);
 
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-            }
-            var tableName = "account.move";
-            var repository = new OdooRepository<AccountMoveOdooModel>(odooClient.Config);
-            var results = await repository.Query().ToListAsync();
-
-            Console.WriteLine(JsonConvert.SerializeObject(results));
-            Console.WriteLine("");
-        }
-
-        public async static Task PrintPayments(OdooClient odooClient)
-        {
-            Console.WriteLine("Payments");
-            try
-            {
-                var tableName = "account.payment";
-                var repository = new OdooRepository<AccountPaymentOdooModel>(odooClient.Config);
-                var results = await repository.Query().ToListAsync();
-
-                Console.WriteLine(JsonConvert.SerializeObject(results));
             }
             catch (Exception ex)
             {
@@ -207,20 +186,55 @@ namespace OdooIntegration.ConsoleApp
             Console.WriteLine("");
         }
 
-        public async static Task PrintDotNetModel(OdooClient odooClient, string argument)
+        public async static Task PrintPayments(OdooClient odooClient)
         {
-            Console.WriteLine(argument);
+            Console.WriteLine("Payments");
             try
             {
-                var modelResult = await odooClient.GetModelAsync(argument);
-                var model = OdooModelMapper.GetDotNetModel(argument, modelResult.Value);
-                Console.WriteLine(model);
+                var repository = new OdooRepository<AccountPaymentOdooModel>(odooClient.Config);
+                var json = await OdooHelper.GetJsonRepositoryResult(repository);
+                Console.WriteLine(json);
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
-            }            
-            Console.WriteLine();
+            }
+            
+            Console.WriteLine("");
+        }
+
+        public async static Task PrintVehicleFleet(OdooClient odooClient)
+        {
+            Console.WriteLine("Flota de vehiculos");
+            try
+            {
+                var repository = new OdooRepository<FleetVehicleOdooModel>(odooClient.Config);
+                var json = await OdooHelper.GetJsonRepositoryResult(repository);
+                Console.WriteLine(json);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+
+            Console.WriteLine("");
+        }
+
+        public async static Task PrintAccountAnalytics(OdooClient odooClient)
+        {
+            Console.WriteLine("Cuentas Analticias");
+            try
+            {
+                var repository = new OdooRepository<AccountAnalyticAccountOdooModel>(odooClient.Config);
+                var json = await OdooHelper.GetJsonRepositoryResult(repository);
+                Console.WriteLine(json);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+
+            Console.WriteLine("");
         }
     }
 }
