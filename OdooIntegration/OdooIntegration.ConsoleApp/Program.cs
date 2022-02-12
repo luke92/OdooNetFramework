@@ -34,6 +34,12 @@ namespace OdooIntegration.ConsoleApp
 
                 await PrintIdentificationTypes(odooClient);
 
+                await PrintAccountAnalyticGroups(odooClient);
+
+                await PrintVehicleBrands(odooClient);
+
+                await PrintVehicleModels(odooClient);
+
                 await PrintProducts(odooClient);
 
                 await PrintProducts2(odooClient);
@@ -115,6 +121,57 @@ namespace OdooIntegration.ConsoleApp
                 Console.WriteLine(ex);
             }
             
+            Console.WriteLine("");
+        }
+
+        public async static Task PrintAccountAnalyticGroups(OdooClient odooClient)
+        {
+            Console.WriteLine("Account Analytic Groups");
+            try
+            {
+                var repository = new OdooRepository<AccountAnalyticGroupOdooModel>(odooClient.Config);
+                var json = await OdooHelper.GetJsonRepositoryResults(repository);
+                Console.WriteLine(json);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+
+            Console.WriteLine("");
+        }
+
+        public async static Task PrintVehicleBrands(OdooClient odooClient)
+        {
+            Console.WriteLine("Vehicle Brands");
+            try
+            {
+                var repository = new OdooRepository<FleetVehicleModelBrandOdooModel>(odooClient.Config);
+                var json = await OdooHelper.GetJsonRepositoryResult(repository);
+                Console.WriteLine(json);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+
+            Console.WriteLine("");
+        }
+
+        public async static Task PrintVehicleModels(OdooClient odooClient)
+        {
+            Console.WriteLine("Vehicle Models");
+            try
+            {
+                var repository = new OdooRepository<FleetVehicleModelOdooModel>(odooClient.Config);
+                var json = await OdooHelper.GetJsonRepositoryResult(repository);
+                Console.WriteLine(json);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+
             Console.WriteLine("");
         }
 
@@ -222,7 +279,7 @@ namespace OdooIntegration.ConsoleApp
 
         public async static Task PrintAccountAnalytics(OdooClient odooClient)
         {
-            Console.WriteLine("Cuentas Analticias");
+            Console.WriteLine("Cuentas Analiticas");
             try
             {
                 var repository = new OdooRepository<AccountAnalyticAccountOdooModel>(odooClient.Config);
