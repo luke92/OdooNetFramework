@@ -552,8 +552,127 @@ namespace OdooIntegration.ConsoleApp.Models
 
         [JsonProperty("sequence_number")]
         public int? SequenceNumber { get; set; }
-    }
 
+        #region ODOO V12 GECSA
+
+        [JsonProperty("move_name")]
+        public string MoveName { get; set; }
+
+        // account.journal
+        [JsonProperty("destination_journal_id")]
+        public long? DestinationJournalId { get; set; }
+
+        // account.invoice
+        [JsonProperty("invoice_ids")]
+        public long[] InvoiceIds { get; set; }
+
+        [JsonProperty("has_invoices")]
+        public bool? HasInvoices { get; set; }
+
+        // account.move.line
+        [JsonProperty("move_line_ids")]
+        public long[] MoveLineIds { get; set; }
+
+        [JsonProperty("move_reconciled")]
+        public bool? MoveReconciled { get; set; }
+
+        // account.batch.payment
+        [JsonProperty("batch_payment_id")]
+        public long? BatchPaymentId { get; set; }
+
+        [JsonProperty("check_amount_in_words")]
+        public string CheckAmountInWords { get; set; }
+
+        [JsonProperty("check_manual_sequencing")]
+        public bool? CheckManualSequencing { get; set; }
+
+        [JsonProperty("check_number")]
+        public int? CheckNumber { get; set; }
+
+        // res.partner
+        [JsonProperty("beneficiario")]
+        public long? Beneficiario { get; set; }
+
+        [JsonProperty("broker")]
+        public bool? Broker { get; set; }
+
+        [JsonProperty("x_studio_no_de_cheque")]
+        public string XStudioNoDeCheque { get; set; }
+
+        [JsonProperty("text_amount")]
+        public string TextAmount { get; set; }
+
+        [JsonProperty("type_currencychange")]
+        public double? TypeCurrencychange { get; set; }
+
+        [JsonProperty("norecb")]
+        public string Norecb { get; set; }
+
+        [JsonProperty("tds")]
+        public bool? Tds { get; set; }
+
+        // payment.way
+        [JsonProperty("payment_way")]
+        public long? PaymentWay { get; set; }
+
+        // payment.tds
+        [JsonProperty("withholdings")]
+        public long[] Withholdings { get; set; }
+
+        // required
+        [JsonProperty("base")]
+        public decimal? Base { get; set; }
+
+        [JsonProperty("amount_payable")]
+        public decimal? AmountPayable { get; set; }
+
+        // account.tax
+        [JsonProperty("accounttax")]
+        public long[] Accounttax { get; set; }
+
+        [JsonProperty("no_autorizado")]
+        public string NoAutorizado { get; set; }
+
+        [JsonProperty("no_contrato")]
+        public string NoContrato { get; set; }
+
+        // res.company
+        [JsonProperty("company_actual")]
+        public long? CompanyActual { get; set; }
+
+        [JsonProperty("multi")]
+        public bool? Multi { get; set; }
+
+        // required
+        [JsonProperty("payment_date")]
+        public DateTime? PaymentDate { get; set; }
+
+        [JsonProperty("communication")]
+        public string Communication { get; set; }
+
+        [JsonProperty("payment_difference")]
+        public decimal? PaymentDifference { get; set; }
+
+        [JsonProperty("payment_difference_handling")]
+        public PaymentDifferenceHandlingAccountPaymentOdooEnum? PaymentDifferenceHandling { get; set; }
+
+        // account.account
+        [JsonProperty("writeoff_account_id")]
+        public long? WriteoffAccountId { get; set; }
+
+        [JsonProperty("writeoff_label")]
+        public string WriteoffLabel { get; set; }
+
+        // res.partner.bank
+        [JsonProperty("partner_bank_account_id")]
+        public long? PartnerBankAccountId { get; set; }
+
+        [JsonProperty("x_studio_test")]
+        public string XStudioTest { get; set; }
+
+        #endregion
+
+    }
 
     [JsonConverter(typeof(StringEnumConverter))]
     public enum PaymentTypeAccountPaymentOdooEnum
@@ -564,7 +683,6 @@ namespace OdooIntegration.ConsoleApp.Models
         [EnumMember(Value = "inbound")]
         ReceiveMoney = 2,
     }
-
 
     [JsonConverter(typeof(StringEnumConverter))]
     public enum PartnerTypeAccountPaymentOdooEnum
@@ -736,6 +854,16 @@ namespace OdooIntegration.ConsoleApp.Models
 
         [EnumMember(Value = "4")]
         OtherExport = 4,
+    }
+
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum PaymentDifferenceHandlingAccountPaymentOdooEnum
+    {
+        [EnumMember(Value = "open")]
+        KeepOpen = 1,
+
+        [EnumMember(Value = "reconcile")]
+        MarkInvoiceAsFullyPaid = 2,
     }
 
 }

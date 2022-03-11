@@ -24,7 +24,7 @@ namespace OdooIntegration.ConsoleApp.Models
 
         // required
         [JsonProperty("date")]
-        public DateTime Date { get; set; }
+        public DateTime? Date { get; set; }
 
         [JsonProperty("ref")]
         public string Ref { get; set; }
@@ -262,32 +262,6 @@ namespace OdooIntegration.ConsoleApp.Models
         [JsonProperty("edi_show_cancel_button")]
         public bool? EdiShowCancelButton { get; set; }
 
-        [JsonProperty("duplicated_vendor_ref")]
-        public string DuplicatedVendorRef { get; set; }
-
-        // required
-        [JsonProperty("extract_state")]
-        public ExtractStateAccountMoveOdooEnum ExtractState { get; set; }
-
-        [JsonProperty("extract_status_code")]
-        public int? ExtractStatusCode { get; set; }
-
-        [JsonProperty("extract_error_message")]
-        public string ExtractErrorMessage { get; set; }
-
-        [JsonProperty("extract_remote_id")]
-        public int? ExtractRemoteId { get; set; }
-
-        // account.invoice_extract.words
-        [JsonProperty("extract_word_ids")]
-        public long[] ExtractWordIds { get; set; }
-
-        [JsonProperty("extract_can_show_resend_button")]
-        public bool? ExtractCanShowResendButton { get; set; }
-
-        [JsonProperty("extract_can_show_send_button")]
-        public bool? ExtractCanShowSendButton { get; set; }
-
         // payment.transaction
         [JsonProperty("transaction_ids")]
         public long[] TransactionIds { get; set; }
@@ -306,46 +280,6 @@ namespace OdooIntegration.ConsoleApp.Models
 
         [JsonProperty("debit_note_count")]
         public int? DebitNoteCount { get; set; }
-
-        [JsonProperty("l10n_latam_amount_untaxed")]
-        public decimal? L10nLatamAmountUntaxed { get; set; }
-
-        // account.move.line
-        [JsonProperty("l10n_latam_tax_ids")]
-        public long[] L10nLatamTaxIds { get; set; }
-
-        // l10n_latam.document.type
-        [JsonProperty("l10n_latam_available_document_type_ids")]
-        public long[] L10nLatamAvailableDocumentTypeIds { get; set; }
-
-        // l10n_latam.document.type
-        [JsonProperty("l10n_latam_document_type_id")]
-        public long? L10nLatamDocumentTypeId { get; set; }
-
-        [JsonProperty("l10n_latam_document_number")]
-        public string L10nLatamDocumentNumber { get; set; }
-
-        [JsonProperty("l10n_latam_use_documents")]
-        public bool? L10nLatamUseDocuments { get; set; }
-
-        [JsonProperty("l10n_latam_manual_document_number")]
-        public bool? L10nLatamManualDocumentNumber { get; set; }
-
-        // l10n_ar.afip.responsibility.type
-        [JsonProperty("l10n_ar_afip_responsibility_type_id")]
-        public long? L10nArAfipResponsibilityTypeId { get; set; }
-
-        [JsonProperty("l10n_ar_currency_rate")]
-        public double? L10nArCurrencyRate { get; set; }
-
-        [JsonProperty("l10n_ar_afip_concept")]
-        public AFIPConceptAccountMoveOdooEnum? L10nArAfipConcept { get; set; }
-
-        [JsonProperty("l10n_ar_afip_service_start")]
-        public DateTime? L10nArAfipServiceStart { get; set; }
-
-        [JsonProperty("l10n_ar_afip_service_end")]
-        public DateTime? L10nArAfipServiceEnd { get; set; }
 
         // mail.activity
         [JsonProperty("activity_ids")]
@@ -468,6 +402,163 @@ namespace OdooIntegration.ConsoleApp.Models
 
         [JsonProperty("__last_update")]
         public DateTime? LastUpdate { get; set; }
+
+        #region ODOO ARGENTINA (RENTLY)
+
+        [JsonProperty("duplicated_vendor_ref")]
+        public string DuplicatedVendorRef { get; set; }
+
+        // required
+        [JsonProperty("extract_state")]
+        public ExtractStateAccountMoveOdooEnum ExtractState { get; set; }
+
+        [JsonProperty("extract_status_code")]
+        public int? ExtractStatusCode { get; set; }
+
+        [JsonProperty("extract_error_message")]
+        public string ExtractErrorMessage { get; set; }
+
+        [JsonProperty("extract_remote_id")]
+        public int? ExtractRemoteId { get; set; }
+
+        // account.invoice_extract.words
+        [JsonProperty("extract_word_ids")]
+        public long[] ExtractWordIds { get; set; }
+
+        [JsonProperty("extract_can_show_resend_button")]
+        public bool? ExtractCanShowResendButton { get; set; }
+
+        [JsonProperty("extract_can_show_send_button")]
+        public bool? ExtractCanShowSendButton { get; set; }
+
+        [JsonProperty("l10n_latam_amount_untaxed")]
+        public decimal? L10nLatamAmountUntaxed { get; set; }
+
+        // account.move.line
+        [JsonProperty("l10n_latam_tax_ids")]
+        public long[] L10nLatamTaxIds { get; set; }
+
+        // l10n_latam.document.type
+        [JsonProperty("l10n_latam_available_document_type_ids")]
+        public long[] L10nLatamAvailableDocumentTypeIds { get; set; }
+
+        // l10n_latam.document.type
+        [JsonProperty("l10n_latam_document_type_id")]
+        public long? L10nLatamDocumentTypeId { get; set; }
+
+        [JsonProperty("l10n_latam_document_number")]
+        public string L10nLatamDocumentNumber { get; set; }
+
+        [JsonProperty("l10n_latam_use_documents")]
+        public bool? L10nLatamUseDocuments { get; set; }
+
+        [JsonProperty("l10n_latam_manual_document_number")]
+        public bool? L10nLatamManualDocumentNumber { get; set; }
+
+        // l10n_ar.afip.responsibility.type
+        [JsonProperty("l10n_ar_afip_responsibility_type_id")]
+        public long? L10nArAfipResponsibilityTypeId { get; set; }
+
+        [JsonProperty("l10n_ar_currency_rate")]
+        public double? L10nArCurrencyRate { get; set; }
+
+        [JsonProperty("l10n_ar_afip_concept")]
+        public AFIPConceptAccountMoveOdooEnum? L10nArAfipConcept { get; set; }
+
+        [JsonProperty("l10n_ar_afip_service_start")]
+        public DateTime? L10nArAfipServiceStart { get; set; }
+
+        [JsonProperty("l10n_ar_afip_service_end")]
+        public DateTime? L10nArAfipServiceEnd { get; set; }
+
+        #endregion
+
+        #region ODOO ESPAÑA (DAVIMA)
+
+        // DAVIMA ODOO V14
+
+        [JsonProperty("move_name")]
+        public string MoveName { get; set; }
+
+
+        [JsonProperty("multi_due")]
+        public bool? MultiDue { get; set; }
+
+        [JsonProperty("multi_date_due")]
+        public string MultiDateDue { get; set; }
+
+        [JsonProperty("financial_type")]
+        public FinancialTypeAccountMoveOdooEnum? FinancialType { get; set; }
+
+        // purchase.bill.union
+        [JsonProperty("purchase_vendor_bill_id")]
+        public long? PurchaseVendorBillId { get; set; }
+
+        // purchase.order
+        [JsonProperty("purchase_id")]
+        public long? PurchaseId { get; set; }
+
+        // stock.move
+        [JsonProperty("stock_move_id")]
+        public long? StockMoveId { get; set; }
+
+        // stock.valuation.layer
+        [JsonProperty("stock_valuation_layer_ids")]
+        public long[] StockValuationLayerIds { get; set; }
+
+        [JsonProperty("payment_mode_filter_type_domain")]
+        public string PaymentModeFilterTypeDomain { get; set; }
+
+        // res.partner
+        [JsonProperty("partner_bank_filter_type_domain")]
+        public long? PartnerBankFilterTypeDomain { get; set; }
+
+        // account.payment.mode
+        [JsonProperty("payment_mode_id")]
+        public long? PaymentModeId { get; set; }
+
+        [JsonProperty("bank_account_required")]
+        public bool? BankAccountRequired { get; set; }
+
+        // crm.team
+        [JsonProperty("team_id")]
+        public long? TeamId { get; set; }
+
+        // res.partner
+        [JsonProperty("partner_shipping_id")]
+        public long? PartnerShippingId { get; set; }
+
+        // account.payment.order
+        [JsonProperty("payment_order_id")]
+        public long? PaymentOrderId { get; set; }
+
+        [JsonProperty("payment_order_ok")]
+        public bool? PaymentOrderOk { get; set; }
+
+        [JsonProperty("reference_type")]
+        public ReferenceTypeAccountMoveOdooEnum? ReferenceType { get; set; }
+
+        // account.banking.mandate
+        [JsonProperty("mandate_id")]
+        public long? MandateId { get; set; }
+
+        [JsonProperty("mandate_required")]
+        public bool? MandateRequired { get; set; }
+
+        // utm.campaign
+        [JsonProperty("campaign_id")]
+        public long? CampaignId { get; set; }
+
+        // utm.source
+        [JsonProperty("source_id")]
+        public long? SourceId { get; set; }
+
+        // utm.medium
+        [JsonProperty("medium_id")]
+        public long? MediumId { get; set; }
+
+        #endregion
+
     }
 
 
@@ -630,6 +721,38 @@ namespace OdooIntegration.ConsoleApp.Models
 
         [EnumMember(Value = "danger")]
         Error = 2,
+    }
+
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum FinancialTypeAccountMoveOdooEnum
+    {
+        [EnumMember(Value = "other")]
+        Otro = 1,
+
+        [EnumMember(Value = "liquidity")]
+        Liquidez = 2,
+
+        [EnumMember(Value = "receivable")]
+        ACobrar = 3,
+
+        [EnumMember(Value = "receivable_refund")]
+        DevolucionesAPagar = 4,
+
+        [EnumMember(Value = "payable")]
+        APagar = 5,
+
+        [EnumMember(Value = "payable_refund")]
+        DevolucionesACobrar = 6,
+    }
+
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum ReferenceTypeAccountMoveOdooEnum
+    {
+        [EnumMember(Value = "none")]
+        FreeReference = 1,
+
+        [EnumMember(Value = "structured")]
+        StructuredReference = 2,
     }
 
 }
