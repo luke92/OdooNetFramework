@@ -48,7 +48,11 @@ namespace OdooIntegration.ConsoleApp
 
                 await PrintInvoices(odooClient);
 
+                await PrintInvoiceLine(odooClient);
+
                 await PrintInvoicesOdooV12(odooClient);
+
+                await PrintInvoiceLineOdooV12(odooClient);
 
                 await PrintPayments(odooClient);
 
@@ -245,12 +249,48 @@ namespace OdooIntegration.ConsoleApp
             Console.WriteLine("");
         }
 
+        public async static Task PrintInvoiceLine(OdooClient odooClient)
+        {
+            Console.WriteLine("Invoice Line");
+            try
+            {
+                var repository = new OdooRepository<AccountMoveLineOdooModel>(odooClient.Config);
+                var json = await OdooHelper.GetJsonRepositoryResult(repository);
+                Console.WriteLine(json);
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+
+            Console.WriteLine("");
+        }
+
         public async static Task PrintInvoicesOdooV12(OdooClient odooClient)
         {
             Console.WriteLine("Invoices ODOO V12");
             try
             {
                 var repository = new OdooRepository<AccountInvoiceOdooModel>(odooClient.Config);
+                var json = await OdooHelper.GetJsonRepositoryResult(repository);
+                Console.WriteLine(json);
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+
+            Console.WriteLine("");
+        }
+
+        public async static Task PrintInvoiceLineOdooV12(OdooClient odooClient)
+        {
+            Console.WriteLine("Invoice Line ODOO V12");
+            try
+            {
+                var repository = new OdooRepository<AccountInvoiceLineOdooModel>(odooClient.Config);
                 var json = await OdooHelper.GetJsonRepositoryResult(repository);
                 Console.WriteLine(json);
 
