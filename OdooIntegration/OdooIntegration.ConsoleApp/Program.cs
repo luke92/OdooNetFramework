@@ -20,48 +20,76 @@ namespace OdooIntegration.ConsoleApp
             var odooClient = GetClient();
 
             await PrintLogin(odooClient);
+            await PrintVersion(odooClient);
 
-            if(args.Length > 0)
+            if (args.Length > 0)
             {
                 foreach(var arg in args)
                 {
-                    OdooHelper.PrintDotNetModel(odooClient, arg);
+                    await OdooHelper.PrintDotNetModel(odooClient, arg);
                 }
             }
             else
             {
-                await PrintVersion(odooClient);
+                var option = SelectMenu();
 
-                await PrintIdentificationTypes(odooClient);
-
-                await PrintAccountAnalyticGroups(odooClient);
-
-                await PrintVehicleBrands(odooClient);
-
-                await PrintVehicleModels(odooClient);
-
-                await PrintProducts(odooClient);
-
-                await PrintProducts2(odooClient);
-
-                await PrintCustomers(odooClient);
-
-                await PrintInvoices(odooClient);
-
-                await PrintInvoiceLine(odooClient);
-
-                await PrintInvoicesOdooV12(odooClient);
-
-                await PrintInvoiceLineOdooV12(odooClient);
-
-                await PrintPayments(odooClient);
-
-                await PrintVehicleFleet(odooClient);
-
-                await PrintAccountAnalytics(odooClient);
+                switch(option)
+                {
+                    case "2":
+                        await InsertInvoiceLineAsync(odooClient);
+                        break;
+                    case "1":
+                        await PrintRecordsModelsAsync(odooClient);
+                        break;
+                    default:
+                        await PrintRecordsModelsAsync(odooClient);
+                        break;
+                }
+                
             }
-            Console.WriteLine("Press any key");
+            Console.WriteLine("Press any key to finish");
             Console.ReadKey();
+        }
+
+        public static string SelectMenu()
+        {
+            Console.WriteLine("Select an option");
+            Console.WriteLine("1) Print Records of Models");
+            Console.WriteLine("2) Insert Invoice Line Test");
+            var key = Console.ReadLine();
+            Console.WriteLine("");
+            return key;
+        }
+
+        public async static Task PrintRecordsModelsAsync(OdooClient odooClient)
+        {
+            await PrintIdentificationTypes(odooClient);
+
+            await PrintAccountAnalyticGroups(odooClient);
+
+            await PrintVehicleBrands(odooClient);
+
+            await PrintVehicleModels(odooClient);
+
+            await PrintProducts(odooClient);
+
+            await PrintProducts2(odooClient);
+
+            await PrintCustomers(odooClient);
+
+            await PrintInvoices(odooClient);
+
+            await PrintInvoiceLine(odooClient);
+
+            await PrintInvoicesOdooV12(odooClient);
+
+            await PrintInvoiceLineOdooV12(odooClient);
+
+            await PrintPayments(odooClient);
+
+            await PrintVehicleFleet(odooClient);
+
+            await PrintAccountAnalytics(odooClient);
         }
 
         public static OdooClient GetClient()
@@ -345,6 +373,74 @@ namespace OdooIntegration.ConsoleApp
                 var repository = new OdooRepository<AccountAnalyticAccountOdooModel>(odooClient.Config);
                 var json = await OdooHelper.GetJsonRepositoryResult(repository);
                 Console.WriteLine(json);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+
+            Console.WriteLine("");
+        }
+
+        public async static Task InsertInvoiceLineAsync(OdooClient odooClient)
+        {
+            Console.WriteLine("Insert invoice line");
+            try
+            {
+                var model = OdooDictionaryModel.Create(() => new AccountMoveOdooModel()
+                {
+                    PartnerId = 1,
+                    InvoiceDate = DateTime.Now,
+                    Date = DateTime.Now,
+                    CreateDate = DateTime.Now,
+                    WriteDate = DateTime.Now,
+                    LastUpdate = DateTime.Now,
+                    State = StatusAccountMoveOdooEnum.Draft,
+                    MoveType = TypeAccountMoveOdooEnum.CustomerInvoice,
+                });
+
+                var result = await OdooHelper.AddModelAsync(model, odooClient);
+                Console.WriteLine(JsonConvert.SerializeObject(result));
+
+                if (result.Id.HasValue)
+                {
+                    var modelLine = OdooDictionaryModel.Create(() => new AccountMoveLineOdooModel()
+                    {
+                        AccountInternalGroup = InternalGroupAccountMoveLineOdooEnum.OffBalance,
+                        MoveId = result.Id.Value,
+                        Date = DateTime.Now,
+                        ParentState = StatusAccountMoveLineOdooEnum.Draft,
+                        JournalId = 1,
+                        AccountId = 77,
+                        Quantity = 1,
+                        PriceUnit = 100,
+                        CurrencyId = 19,
+                        PartnerId = 1,                        
+                        ProductId = 1,
+                        TaxIds = new long[] {19},
+                        CreateDate = DateTime.Now,
+                        WriteDate = DateTime.Now,
+                        LastUpdate = DateTime.Now,                        
+                    });
+
+                    var result2 = await OdooHelper.AddModelAsync(modelLine, odooClient);
+                    Console.WriteLine(JsonConvert.SerializeObject(result2));
+
+                    if (result2.Id.HasValue)
+                    {
+                        var modelUpdate = OdooDictionaryModel.Create(() => new AccountMoveOdooModel()
+                        {
+                            State = StatusAccountMoveOdooEnum.Posted,
+                            LineIds = new long[result2.Id.Value],
+                            InvoiceLineIds = new long[result2.Id.Value],
+                        });
+
+                        var result3 = await OdooHelper.UpdateModelAsync(modelUpdate, result.Id.Value, odooClient);
+                        Console.WriteLine(JsonConvert.SerializeObject(result3));
+                    }
+                }
+                
+                
             }
             catch (Exception ex)
             {

@@ -305,6 +305,43 @@ namespace OdooIntegration.ConsoleApp.Models
 
         [JsonProperty("__last_update")]
         public DateTime? LastUpdate { get; set; }
+
+        //ARGENTINA
+
+        /// <summary>
+        /// l10n_latam_document_type_id - many2one - l10n_latam.document.type <br />
+        /// Required: False, Readonly: True, Store: True, Sortable: True <br />
+        /// </summary>
+        [JsonProperty("l10n_latam_document_type_id")]
+        public long? L10nLatamDocumentTypeId { get; set; }
+
+        /// <summary>
+        /// l10n_latam_price_unit - float  <br />
+        /// Required: False, Readonly: True, Store: False, Sortable: False <br />
+        /// </summary>
+        [JsonProperty("l10n_latam_price_unit")]
+        public double? L10nLatamPriceUnit { get; set; }
+
+        /// <summary>
+        /// l10n_latam_price_subtotal - monetary  <br />
+        /// Required: False, Readonly: True, Store: False, Sortable: False <br />
+        /// </summary>
+        [JsonProperty("l10n_latam_price_subtotal")]
+        public decimal? L10nLatamPriceSubtotal { get; set; }
+
+        /// <summary>
+        /// l10n_latam_price_net - float  <br />
+        /// Required: False, Readonly: True, Store: False, Sortable: False <br />
+        /// </summary>
+        [JsonProperty("l10n_latam_price_net")]
+        public double? L10nLatamPriceNet { get; set; }
+
+        /// <summary>
+        /// l10n_latam_tax_ids - one2many - account.tax <br />
+        /// Required: False, Readonly: True, Store: False, Sortable: False <br />
+        /// </summary>
+        [JsonProperty("l10n_latam_tax_ids")]
+        public long[] L10nLatamTaxIds { get; set; }
     }
 
 
@@ -374,4 +411,7 @@ namespace OdooIntegration.ConsoleApp.Models
         [EnumMember(Value = "line_note")]
         Note = 2,
     }
+
+
+
 }
