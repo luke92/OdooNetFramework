@@ -38,6 +38,18 @@ namespace OdooIntegration.ConsoleApp.Helpers
             return JsonConvert.SerializeObject(result);
         }
 
+        public async static Task<long> GetFirstId<T>(OdooRepository<T> repository) where T : IOdooModel, new()
+        {
+            var result = await repository.Query().OrderBy(x => x.Id).Select(x => x.Id).FirstOrDefaultAsync();
+            return result.Value.Id;
+        }
+
+        public async static Task<long> GetLastId<T>(OdooRepository<T> repository) where T : IOdooModel, new()
+        {
+            var result = await repository.Query().OrderByDescending(x => x.Id).Select(x => x.Id).FirstOrDefaultAsync();
+            return result.Value.Id;
+        }
+
         public async static Task<long?> AddModelAndReturnIdAsync<T>(OdooDictionaryModel<T> model, OdooClient odooClient) where T : IOdooModel, new()
         {
             var repository = new OdooRepository<T>(odooClient.Config);

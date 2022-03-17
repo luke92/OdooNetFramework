@@ -387,60 +387,30 @@ namespace OdooIntegration.ConsoleApp
             Console.WriteLine("Insert invoice line");
             try
             {
-                var model = OdooDictionaryModel.Create(() => new AccountMoveOdooModel()
+                var repoCustomer = new OdooRepository<ResPartnerOdooModel>(odooClient.Config);
+                var partnerId = await OdooHelper.GetLastId(repoCustomer);
+
+                var repoProduct = new OdooRepository<ProductProductOdooModel>(odooClient.Config);
+                var productId = await OdooHelper.GetLastId(repoProduct);
+
+                var version = await GetVersion(odooClient);
+                int.TryParse(version.Trim().Split('.')[0], out var versionServer);
+
+                var accountId = 0l;
+                var currencyId = 0l;
+                var taxId = 0l;
+
+                if (versionServer > 12)
                 {
-                    PartnerId = 1,
-                    InvoiceDate = DateTime.Now,
-                    Date = DateTime.Now,
-                    CreateDate = DateTime.Now,
-                    WriteDate = DateTime.Now,
-                    LastUpdate = DateTime.Now,
-                    State = StatusAccountMoveOdooEnum.Draft,
-                    MoveType = TypeAccountMoveOdooEnum.CustomerInvoice,
-                });
-
-                var result = await OdooHelper.AddModelAsync(model, odooClient);
-                Console.WriteLine(JsonConvert.SerializeObject(result));
-
-                if (result.Id.HasValue)
-                {
-                    var modelLine = OdooDictionaryModel.Create(() => new AccountMoveLineOdooModel()
-                    {
-                        AccountInternalGroup = InternalGroupAccountMoveLineOdooEnum.OffBalance,
-                        MoveId = result.Id.Value,
-                        Date = DateTime.Now,
-                        ParentState = StatusAccountMoveLineOdooEnum.Draft,
-                        JournalId = 1,
-                        AccountId = 77,
-                        Quantity = 1,
-                        PriceUnit = 100,
-                        CurrencyId = 19,
-                        PartnerId = 1,                        
-                        ProductId = 1,
-                        TaxIds = new long[] {19},
-                        CreateDate = DateTime.Now,
-                        WriteDate = DateTime.Now,
-                        LastUpdate = DateTime.Now,                        
-                    });
-
-                    var result2 = await OdooHelper.AddModelAsync(modelLine, odooClient);
-                    Console.WriteLine(JsonConvert.SerializeObject(result2));
-
-                    if (result2.Id.HasValue)
-                    {
-                        var modelUpdate = OdooDictionaryModel.Create(() => new AccountMoveOdooModel()
-                        {
-                            State = StatusAccountMoveOdooEnum.Posted,
-                            LineIds = new long[result2.Id.Value],
-                            InvoiceLineIds = new long[result2.Id.Value],
-                        });
-
-                        var result3 = await OdooHelper.UpdateModelAsync(modelUpdate, result.Id.Value, odooClient);
-                        Console.WriteLine(JsonConvert.SerializeObject(result3));
-                    }
+                    var journalId = 0l;
+                    await InsertInvoiceOdooV14(odooClient, partnerId, journalId, accountId, currencyId, productId, taxId);
                 }
-                
-                
+                else
+                {
+                    var repoAccountAnalytic = new OdooRepository<AccountAnalyticGroupOdooModel>(odooClient.Config);
+                    var accountAnalyticId = await OdooHelper.GetLastId(repoAccountAnalytic);
+                    await InsertInvoiceOdooV12(odooClient, partnerId, accountAnalyticId, accountId, currencyId, productId, taxId);
+                }
             }
             catch (Exception ex)
             {
@@ -448,6 +418,121 @@ namespace OdooIntegration.ConsoleApp
             }
 
             Console.WriteLine("");
+        }
+
+        private async static Task<string> GetVersion(OdooClient odooClient)
+        {
+            var versionResult = await odooClient.GetVersionAsync();
+            return versionResult.Value.ServerSerie;
+        }
+
+        private async static Task InsertInvoiceOdooV14(OdooClient odooClient, long partnerId, long journalId, long accountId, long currencyId, long productId, long taxId)
+        {
+            
+
+            var model = OdooDictionaryModel.Create(() => new AccountMoveOdooModel()
+            {
+                PartnerId = partnerId,
+                InvoiceDate = DateTime.Now,
+                Date = DateTime.Now,
+                CreateDate = DateTime.Now,
+                WriteDate = DateTime.Now,
+                LastUpdate = DateTime.Now,
+                State = StatusAccountMoveOdooEnum.Draft,
+                MoveType = TypeAccountMoveOdooEnum.CustomerInvoice,
+            });
+
+            var result = await OdooHelper.AddModelAsync(model, odooClient);
+            Console.WriteLine(JsonConvert.SerializeObject(result));
+
+            if (result.Id.HasValue)
+            {
+                var modelLine = OdooDictionaryModel.Create(() => new AccountMoveLineOdooModel()
+                {
+                    AccountInternalGroup = InternalGroupAccountMoveLineOdooEnum.OffBalance,
+                    MoveId = result.Id.Value,
+                    Date = DateTime.Now,
+                    ParentState = StatusAccountMoveLineOdooEnum.Draft,
+                    JournalId = journalId,
+                    AccountId = accountId,
+                    Quantity = 1,
+                    PriceUnit = 100,
+                    CurrencyId = currencyId,
+                    PartnerId = partnerId,
+                    ProductId = productId,
+                    TaxIds = new long[] { taxId },
+                    CreateDate = DateTime.Now,
+                    WriteDate = DateTime.Now,
+                    LastUpdate = DateTime.Now,
+                });
+
+                var result2 = await OdooHelper.AddModelAsync(modelLine, odooClient);
+                Console.WriteLine(JsonConvert.SerializeObject(result2));
+
+                if (result2.Id.HasValue)
+                {
+                    var modelUpdate = OdooDictionaryModel.Create(() => new AccountMoveOdooModel()
+                    {
+                        State = StatusAccountMoveOdooEnum.Posted,
+                        LineIds = new long[result2.Id.Value],
+                        InvoiceLineIds = new long[result2.Id.Value],
+                    });
+
+                    var result3 = await OdooHelper.UpdateModelAsync(modelUpdate, result.Id.Value, odooClient);
+                    Console.WriteLine(JsonConvert.SerializeObject(result3));
+                }
+            }
+        }
+
+        private async static Task InsertInvoiceOdooV12(OdooClient odooClient, long partnerId, long accountAnalyticId, long accountId, long currencyId, long productId, long taxId)
+        {
+            var model = OdooDictionaryModel.Create(() => new AccountInvoiceOdooModel()
+            {
+                PartnerId = partnerId,
+                DateInvoice = DateTime.Now,
+                CreateDate = DateTime.Now,
+                WriteDate = DateTime.Now,
+                LastUpdate = DateTime.Now,
+                Type = TypeAccountInvoiceOdooEnum.CustomerInvoice,
+                State = StatusAccountInvoiceOdooEnum.Draft,
+            });
+
+            var result = await OdooHelper.AddModelAsync(model, odooClient);
+            Console.WriteLine(JsonConvert.SerializeObject(result));
+
+            if (result.Id.HasValue)
+            {
+                var modelLine = OdooDictionaryModel.Create(() => new AccountInvoiceLineOdooModel()
+                {
+                    AccountId = accountId,
+                    Quantity = 1,
+                    PriceUnit = 100,
+                    CurrencyId = currencyId,
+                    PartnerId = partnerId,
+                    ProductId = productId,
+                    AccountAnalyticId = accountAnalyticId,
+                    InvoiceLineTaxIds = new long[] { taxId },
+                    CreateDate = DateTime.Now,
+                    WriteDate = DateTime.Now,
+                    LastUpdate = DateTime.Now,
+                });
+
+                var result2 = await OdooHelper.AddModelAsync(modelLine, odooClient);
+                Console.WriteLine(JsonConvert.SerializeObject(result2));
+
+                if (result2.Id.HasValue)
+                {
+                    var modelUpdate = OdooDictionaryModel.Create(() => new AccountMoveOdooModel()
+                    {
+                        State = StatusAccountMoveOdooEnum.Posted,
+                        LineIds = new long[result2.Id.Value],
+                        InvoiceLineIds = new long[result2.Id.Value],
+                    });
+
+                    var result3 = await OdooHelper.UpdateModelAsync(modelUpdate, result.Id.Value, odooClient);
+                    Console.WriteLine(JsonConvert.SerializeObject(result3));
+                }
+            }
         }
     }
 }
