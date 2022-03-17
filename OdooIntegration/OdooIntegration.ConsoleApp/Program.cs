@@ -393,16 +393,22 @@ namespace OdooIntegration.ConsoleApp
                 var repoProduct = new OdooRepository<ProductProductOdooModel>(odooClient.Config);
                 var productId = await OdooHelper.GetLastId(repoProduct);
 
+                var repoAccount = new OdooRepository<AccountAccountOdooModel>(odooClient.Config);
+                var accountId = await OdooHelper.GetFirstId(repoAccount);
+
+                var repoCurrency = new OdooRepository<ResCurrencyOdooModel>(odooClient.Config);
+                var currencyId = await OdooHelper.GetFirstId(repoCurrency);
+
+                var repoTax = new OdooRepository<AccountTaxOdooModel>(odooClient.Config);
+                var taxId = await OdooHelper.GetFirstId(repoTax);
+
                 var version = await GetVersion(odooClient);
                 int.TryParse(version.Trim().Split('.')[0], out var versionServer);
 
-                var accountId = 0l;
-                var currencyId = 0l;
-                var taxId = 0l;
-
                 if (versionServer > 12)
                 {
-                    var journalId = 0l;
+                    var repoJournal = new OdooRepository<AccountJournalOdooModel>(odooClient.Config);
+                    var journalId = await OdooHelper.GetFirstId(repoJournal);
                     await InsertInvoiceOdooV14(odooClient, partnerId, journalId, accountId, currencyId, productId, taxId);
                 }
                 else
@@ -440,6 +446,7 @@ namespace OdooIntegration.ConsoleApp
                 LastUpdate = DateTime.Now,
                 State = StatusAccountMoveOdooEnum.Draft,
                 MoveType = TypeAccountMoveOdooEnum.CustomerInvoice,
+                CurrencyId = currencyId
             });
 
             var result = await OdooHelper.AddModelAsync(model, odooClient);
@@ -495,6 +502,7 @@ namespace OdooIntegration.ConsoleApp
                 LastUpdate = DateTime.Now,
                 Type = TypeAccountInvoiceOdooEnum.CustomerInvoice,
                 State = StatusAccountInvoiceOdooEnum.Draft,
+                CurrencyId = currencyId
             });
 
             var result = await OdooHelper.AddModelAsync(model, odooClient);

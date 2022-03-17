@@ -52,19 +52,23 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Helpers\OdooHelper.cs" />
+    <Compile Include="Models\AccountAccountOdooModel.cs" />
     <Compile Include="Models\AccountAnalyticAccountOdooModel.cs" />
     <Compile Include="Models\AccountAnalyticGroupOdooModel.cs" />
     <Compile Include="Models\AccountInvoiceLineOdooModel.cs" />
     <Compile Include="Models\AccountInvoiceOdooModel.cs" />
+    <Compile Include="Models\AccountJournalOdooModel.cs" />
     <Compile Include="Models\AccountMoveLineOdooModel.cs" />
     <Compile Include="Models\AccountMoveOdooModel.cs" />
     <Compile Include="Models\AccountPaymentOdooModel.cs" />
+    <Compile Include="Models\AccountTaxOdooModel.cs" />
     <Compile Include="Models\FleetVehicleModelBrandOdooModel.cs" />
     <Compile Include="Models\FleetVehicleModelOdooModel.cs" />
     <Compile Include="Models\FleetVehicleOdooModel.cs" />
     <Compile Include="Models\L10nLatamIdentificationTypeOdooModel.cs" />
     <Compile Include="Models\ProductProductOdooModel.cs" />
     <Compile Include="Models\ProductTemplateOdooModel.cs" />
+    <Compile Include="Models\ResCurrencyOdooModel.cs" />
     <Compile Include="Models\ResPartnerOdooModel.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
