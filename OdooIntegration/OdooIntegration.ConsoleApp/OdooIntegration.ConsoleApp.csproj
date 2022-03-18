@@ -70,6 +70,8 @@
     <Compile Include="Models\ProductTemplateOdooModel.cs" />
     <Compile Include="Models\ResCurrencyOdooModel.cs" />
     <Compile Include="Models\ResPartnerOdooModel.cs" />
+    <Compile Include="Models\UtmMediumOdooModel.cs" />
+    <Compile Include="Models\UtmSourceOdooModel.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -32,10 +32,18 @@ namespace OdooIntegration.ConsoleApp.Helpers
             return JsonConvert.SerializeObject(results);
         }
 
-        public async static Task<string> GetJsonRepositoryResult<T>(OdooRepository<T> repository) where T : IOdooModel, new()
+        public async static Task<string> GetJsonRepositoryResult<T>(OdooRepository<T> repository, long? id = null) where T : IOdooModel, new()
         {
-            var result = await repository.Query().OrderByDescending(x => x.Id).FirstOrDefaultAsync();
-            return JsonConvert.SerializeObject(result);
+            if (id.HasValue)
+            {
+                var result = await repository.Query().Where(x => x.Id, PortaCapena.OdooJsonRpcClient.Consts.OdooOperator.EqualsTo, id.Value).FirstOrDefaultAsync();
+                return JsonConvert.SerializeObject(result);
+            }
+            else
+            {
+                var result = await repository.Query().OrderByDescending(x => x.Id).FirstOrDefaultAsync();
+                return JsonConvert.SerializeObject(result);
+            }            
         }
 
         public async static Task<long> GetFirstId<T>(OdooRepository<T> repository) where T : IOdooModel, new()

@@ -35,6 +35,9 @@ namespace OdooIntegration.ConsoleApp
 
                 switch(option)
                 {
+                    case "3":
+                        await PrintInvoiceData(odooClient);
+                        break;
                     case "2":
                         await InsertInvoiceLineAsync(odooClient);
                         break;
@@ -51,11 +54,38 @@ namespace OdooIntegration.ConsoleApp
             Console.ReadKey();
         }
 
-        public static string SelectMenu()
+        private async static Task PrintInvoiceData(OdooClient odooClient)
+        {
+            var invoiceIdString = "";
+            var invoiceId = 0l;
+            var json = "";
+            do
+            {
+                Console.WriteLine("Enter Invoice ID");
+                invoiceIdString = Console.ReadLine();
+            } while (!long.TryParse(invoiceIdString, out invoiceId));
+
+            var versionServer = await GetVersionServer(odooClient);
+            if (versionServer > 12)
+            {
+                var repository = new OdooRepository<AccountMoveOdooModel>(odooClient.Config);
+                json = await OdooHelper.GetJsonRepositoryResult(repository, invoiceId);
+            }
+            else
+            {
+                var repository = new OdooRepository<AccountInvoiceOdooModel>(odooClient.Config);
+                json = await OdooHelper.GetJsonRepositoryResult(repository, invoiceId);
+            }
+            Console.WriteLine("Invoice ID: " + invoiceId);
+            Console.WriteLine(json);
+        }
+
+        private static string SelectMenu()
         {
             Console.WriteLine("Select an option");
             Console.WriteLine("1) Print Records of Models");
             Console.WriteLine("2) Insert Invoice Line Test");
+            Console.WriteLine("3) Print Invoice by Id");
             var key = Console.ReadLine();
             Console.WriteLine("");
             return key;
@@ -402,20 +432,26 @@ namespace OdooIntegration.ConsoleApp
                 var repoTax = new OdooRepository<AccountTaxOdooModel>(odooClient.Config);
                 var taxId = await OdooHelper.GetFirstId(repoTax);
 
-                var version = await GetVersion(odooClient);
-                int.TryParse(version.Trim().Split('.')[0], out var versionServer);
+                var repoJournal = new OdooRepository<AccountJournalOdooModel>(odooClient.Config);
+                var journalId = await OdooHelper.GetFirstId(repoJournal);
 
+                var versionServer = await GetVersionServer(odooClient);
                 if (versionServer > 12)
                 {
-                    var repoJournal = new OdooRepository<AccountJournalOdooModel>(odooClient.Config);
-                    var journalId = await OdooHelper.GetFirstId(repoJournal);
                     await InsertInvoiceOdooV14(odooClient, partnerId, journalId, accountId, currencyId, productId, taxId);
                 }
                 else
                 {
                     var repoAccountAnalytic = new OdooRepository<AccountAnalyticGroupOdooModel>(odooClient.Config);
                     var accountAnalyticId = await OdooHelper.GetLastId(repoAccountAnalytic);
-                    await InsertInvoiceOdooV12(odooClient, partnerId, accountAnalyticId, accountId, currencyId, productId, taxId);
+
+                    var repoMedium = new OdooRepository<UtmMediumOdooModel>(odooClient.Config);
+                    var mediumId = await OdooHelper.GetFirstId(repoMedium);
+
+                    var repoSource = new OdooRepository<UtmMediumOdooModel>(odooClient.Config);
+                    var sourceId = await OdooHelper.GetFirstId(repoSource);
+
+                    await InsertInvoiceOdooV12(odooClient, partnerId, journalId, accountAnalyticId, accountId, currencyId, productId, taxId, mediumId, sourceId);
                 }
             }
             catch (Exception ex)
@@ -432,6 +468,13 @@ namespace OdooIntegration.ConsoleApp
             return versionResult.Value.ServerSerie;
         }
 
+        private async static Task<int> GetVersionServer(OdooClient odooClient)
+        {
+            var version = await GetVersion(odooClient);
+            int.TryParse(version.Trim().Split('.')[0], out var versionServer);
+            return versionServer;
+        }
+
         private async static Task InsertInvoiceOdooV14(OdooClient odooClient, long partnerId, long journalId, long accountId, long currencyId, long productId, long taxId)
         {
             
@@ -446,7 +489,8 @@ namespace OdooIntegration.ConsoleApp
                 LastUpdate = DateTime.Now,
                 State = StatusAccountMoveOdooEnum.Draft,
                 MoveType = TypeAccountMoveOdooEnum.CustomerInvoice,
-                CurrencyId = currencyId
+                CurrencyId = currencyId,
+                JournalId = journalId,
             });
 
             var result = await OdooHelper.AddModelAsync(model, odooClient);
@@ -456,11 +500,10 @@ namespace OdooIntegration.ConsoleApp
             {
                 var modelLine = OdooDictionaryModel.Create(() => new AccountMoveLineOdooModel()
                 {
-                    AccountInternalGroup = InternalGroupAccountMoveLineOdooEnum.OffBalance,
+                    AccountInternalGroup = InternalGroupAccountMoveLineOdooEnum.Income,
                     MoveId = result.Id.Value,
                     Date = DateTime.Now,
                     ParentState = StatusAccountMoveLineOdooEnum.Draft,
-                    JournalId = journalId,
                     AccountId = accountId,
                     Quantity = 1,
                     PriceUnit = 100,
@@ -491,7 +534,7 @@ namespace OdooIntegration.ConsoleApp
             }
         }
 
-        private async static Task InsertInvoiceOdooV12(OdooClient odooClient, long partnerId, long accountAnalyticId, long accountId, long currencyId, long productId, long taxId)
+        private async static Task InsertInvoiceOdooV12(OdooClient odooClient, long partnerId, long journalId, long accountAnalyticId, long accountId, long currencyId, long productId, long taxId, long mediumId, long sourceId)
         {
             var model = OdooDictionaryModel.Create(() => new AccountInvoiceOdooModel()
             {
@@ -502,7 +545,11 @@ namespace OdooIntegration.ConsoleApp
                 LastUpdate = DateTime.Now,
                 Type = TypeAccountInvoiceOdooEnum.CustomerInvoice,
                 State = StatusAccountInvoiceOdooEnum.Draft,
-                CurrencyId = currencyId
+                CurrencyId = currencyId,
+                JournalId = journalId,
+                AccountId = accountId,
+                MediumId = mediumId,
+                SourceId = sourceId
             });
 
             var result = await OdooHelper.AddModelAsync(model, odooClient);
@@ -512,11 +559,11 @@ namespace OdooIntegration.ConsoleApp
             {
                 var modelLine = OdooDictionaryModel.Create(() => new AccountInvoiceLineOdooModel()
                 {
+                    InvoiceId = result.Id.Value,
                     AccountId = accountId,
+                    Name = "PRUEBA",
                     Quantity = 1,
                     PriceUnit = 100,
-                    CurrencyId = currencyId,
-                    PartnerId = partnerId,
                     ProductId = productId,
                     AccountAnalyticId = accountAnalyticId,
                     InvoiceLineTaxIds = new long[] { taxId },
@@ -530,11 +577,9 @@ namespace OdooIntegration.ConsoleApp
 
                 if (result2.Id.HasValue)
                 {
-                    var modelUpdate = OdooDictionaryModel.Create(() => new AccountMoveOdooModel()
+                    var modelUpdate = OdooDictionaryModel.Create(() => new AccountInvoiceOdooModel()
                     {
-                        State = StatusAccountMoveOdooEnum.Posted,
-                        LineIds = new long[result2.Id.Value],
-                        InvoiceLineIds = new long[result2.Id.Value],
+                        State = StatusAccountInvoiceOdooEnum.Open,
                     });
 
                     var result3 = await OdooHelper.UpdateModelAsync(modelUpdate, result.Id.Value, odooClient);
