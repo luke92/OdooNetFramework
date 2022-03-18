@@ -38,8 +38,10 @@ namespace OdooIntegration.ConsoleApp.Models
         [JsonProperty("product_id")]
         public long? ProductId { get; set; }
 
+        /*
         [JsonProperty("product_image")]
         public string ProductImage { get; set; }
+        */
 
         // account.account
         [JsonProperty("account_id")]

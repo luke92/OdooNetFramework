@@ -65,19 +65,45 @@ namespace OdooIntegration.ConsoleApp
                 invoiceIdString = Console.ReadLine();
             } while (!long.TryParse(invoiceIdString, out invoiceId));
 
+            Console.WriteLine("Invoice ID: " + invoiceId);
+
             var versionServer = await GetVersionServer(odooClient);
             if (versionServer > 12)
             {
-                var repository = new OdooRepository<AccountMoveOdooModel>(odooClient.Config);
-                json = await OdooHelper.GetJsonRepositoryResult(repository, invoiceId);
+                var repoInvoice = new OdooRepository<AccountMoveOdooModel>(odooClient.Config);
+                var invoice = await OdooHelper.GetAsync(repoInvoice, invoiceId);
+                Console.WriteLine(JsonConvert.SerializeObject(invoice));
+                Console.WriteLine("Invoice Lines");
+                var repoInvoiceLine = new OdooRepository<AccountMoveLineOdooModel>(odooClient.Config);
+                foreach (var line in invoice.InvoiceLineIds)
+                {
+                    Console.WriteLine("Invoice Line ID: " + line);                    
+                    var invoiceLine = await OdooHelper.GetAsync(repoInvoiceLine, line);
+                    Console.WriteLine(JsonConvert.SerializeObject(invoiceLine));
+                }
             }
             else
             {
-                var repository = new OdooRepository<AccountInvoiceOdooModel>(odooClient.Config);
-                json = await OdooHelper.GetJsonRepositoryResult(repository, invoiceId);
+                var repoInvoiceV12 = new OdooRepository<AccountInvoiceOdooModel>(odooClient.Config);
+                var invoice = await OdooHelper.GetAsync(repoInvoiceV12, invoiceId);
+                Console.WriteLine(JsonConvert.SerializeObject(invoice));
+                Console.WriteLine("Invoice Lines");
+                var repoInvoiceLine = new OdooRepository<AccountInvoiceLineOdooModel>(odooClient.Config);
+                foreach (var line in invoice.InvoiceLineIds)
+                {
+                    Console.WriteLine("Invoice Line ID: " + line);                    
+                    var invoiceLine = await OdooHelper.GetAsync(repoInvoiceLine, line);
+                    Console.WriteLine(JsonConvert.SerializeObject(invoiceLine));
+                }
+                Console.WriteLine("Invoice Taxes");
+                var repoTaxes = new OdooRepository<AccountInvoiceTaxOdooModel>(odooClient.Config);
+                foreach (var tax in invoice.TaxLineIds)
+                {
+                    Console.WriteLine("Invoice Tax ID: " + tax);                    
+                    var taxLine = await OdooHelper.GetAsync(repoTaxes, tax);
+                    Console.WriteLine(JsonConvert.SerializeObject(taxLine));
+                }
             }
-            Console.WriteLine("Invoice ID: " + invoiceId);
-            Console.WriteLine(json);
         }
 
         private static string SelectMenu()

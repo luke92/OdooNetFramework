@@ -46,6 +46,12 @@ namespace OdooIntegration.ConsoleApp.Helpers
             }            
         }
 
+        public async static Task<T> GetAsync<T>(OdooRepository<T> repository, long id) where T : IOdooModel, new()
+        {
+            var result = await repository.Query().Where(x => x.Id, PortaCapena.OdooJsonRpcClient.Consts.OdooOperator.EqualsTo, id).FirstOrDefaultAsync();
+            return result.Value;
+        }
+
         public async static Task<long> GetFirstId<T>(OdooRepository<T> repository) where T : IOdooModel, new()
         {
             var result = await repository.Query().OrderBy(x => x.Id).Select(x => x.Id).FirstOrDefaultAsync();

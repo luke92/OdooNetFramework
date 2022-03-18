@@ -57,6 +57,7 @@
     <Compile Include="Models\AccountAnalyticGroupOdooModel.cs" />
     <Compile Include="Models\AccountInvoiceLineOdooModel.cs" />
     <Compile Include="Models\AccountInvoiceOdooModel.cs" />
+    <Compile Include="Models\AccountInvoiceTaxOdooModel.cs" />
     <Compile Include="Models\AccountJournalOdooModel.cs" />
     <Compile Include="Models\AccountMoveLineOdooModel.cs" />
     <Compile Include="Models\AccountMoveOdooModel.cs" />
