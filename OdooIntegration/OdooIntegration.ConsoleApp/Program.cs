@@ -395,7 +395,7 @@ namespace OdooIntegration.ConsoleApp
                 var partnerId = await OdooHelper.GetLastId(repoCustomer);
 
                 var repoProduct = new OdooRepository<ProductProductOdooModel>(odooClient.Config);
-                var productId = await OdooHelper.GetLastId(repoProduct);
+                var productId = await OdooHelper.GetFirstId(repoProduct);
 
                 var repoAccount = new OdooRepository<AccountAccountOdooModel>(odooClient.Config);
                 var accountIdInvoice = await OdooHelper.GetAccountFirstId(repoAccount, InternalTypeAccountAccountOdooEnum.Receivable, InternalGroupAccountAccountOdooEnum.Asset);
