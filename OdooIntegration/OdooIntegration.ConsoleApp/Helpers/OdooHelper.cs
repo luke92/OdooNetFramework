@@ -1,7 +1,9 @@
 ﻿using Newtonsoft.Json;
+using OdooIntegration.ConsoleApp.Models;
 using PortaCapena.OdooJsonRpcClient;
 using PortaCapena.OdooJsonRpcClient.Converters;
 using PortaCapena.OdooJsonRpcClient.Models;
+using PortaCapena.OdooJsonRpcClient.Request;
 using PortaCapena.OdooJsonRpcClient.Result;
 using System;
 using System.Threading.Tasks;
@@ -62,6 +64,37 @@ namespace OdooIntegration.ConsoleApp.Helpers
         {
             var result = await repository.Query().OrderByDescending(x => x.Id).Select(x => x.Id).FirstOrDefaultAsync();
             return result.Value.Id;
+        }
+
+        public async static Task<long> GetAccountLastId(OdooRepository<AccountAccountOdooModel> repository, InternalTypeAccountAccountOdooEnum? internalType = null, InternalGroupAccountAccountOdooEnum? internalGroup = null)
+        {
+            var query = GetAccountQuery(repository, internalType, internalGroup);
+            query = query.OrderByDescending(x => x.Id);
+            var result = await query.FirstOrDefaultAsync();
+            return result.Value.Id;
+        }
+
+        public async static Task<long> GetAccountFirstId(OdooRepository<AccountAccountOdooModel> repository, InternalTypeAccountAccountOdooEnum? internalType = null, InternalGroupAccountAccountOdooEnum? internalGroup = null)
+        {
+            var query = GetAccountQuery(repository, internalType, internalGroup);
+            query = query.OrderBy(x => x.Id);
+            var result = await query.FirstOrDefaultAsync();
+            return result.Value.Id;
+        }
+
+        private static OdooQueryBuilder<AccountAccountOdooModel> GetAccountQuery(OdooRepository<AccountAccountOdooModel> repository, InternalTypeAccountAccountOdooEnum? internalType = null, InternalGroupAccountAccountOdooEnum? internalGroup = null)
+        {
+            var query = repository.Query();
+            if (internalType.HasValue)
+            {
+                query = query.Where(x => x.InternalType, PortaCapena.OdooJsonRpcClient.Consts.OdooOperator.EqualsTo, internalType);
+            }
+            if (internalGroup.HasValue)
+            {
+                query = query.Where(x => x.InternalGroup, PortaCapena.OdooJsonRpcClient.Consts.OdooOperator.EqualsTo, internalGroup);
+            }
+
+            return query.Select(x => x.Id);
         }
 
         public async static Task<long?> AddModelAndReturnIdAsync<T>(OdooDictionaryModel<T> model, OdooClient odooClient) where T : IOdooModel, new()

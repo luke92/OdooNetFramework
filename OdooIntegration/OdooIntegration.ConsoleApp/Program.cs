@@ -398,7 +398,8 @@ namespace OdooIntegration.ConsoleApp
                 var productId = await OdooHelper.GetLastId(repoProduct);
 
                 var repoAccount = new OdooRepository<AccountAccountOdooModel>(odooClient.Config);
-                var accountId = await OdooHelper.GetFirstId(repoAccount);
+                var accountIdInvoice = await OdooHelper.GetAccountFirstId(repoAccount, InternalTypeAccountAccountOdooEnum.Receivable, InternalGroupAccountAccountOdooEnum.Asset);
+                var accountIdInvoiceLine = await OdooHelper.GetAccountFirstId(repoAccount, InternalTypeAccountAccountOdooEnum.Regular, InternalGroupAccountAccountOdooEnum.Income);
 
                 var repoCurrency = new OdooRepository<ResCurrencyOdooModel>(odooClient.Config);
                 var currencyId = await OdooHelper.GetFirstId(repoCurrency);
@@ -412,7 +413,7 @@ namespace OdooIntegration.ConsoleApp
                 var versionServer = await GetVersionServer(odooClient);
                 if (versionServer > 12)
                 {
-                    await InsertInvoiceOdooV14(odooClient, partnerId, journalId, accountId, currencyId, productId, taxId);
+                    await InsertInvoiceOdooV14(odooClient, partnerId, journalId, accountIdInvoice, currencyId, productId, taxId);
                 }
                 else
                 {
@@ -425,7 +426,7 @@ namespace OdooIntegration.ConsoleApp
                     var repoSource = new OdooRepository<UtmMediumOdooModel>(odooClient.Config);
                     var sourceId = await OdooHelper.GetFirstId(repoSource);
 
-                    await InsertInvoiceOdooV12(odooClient, partnerId, journalId, accountAnalyticId, accountId, currencyId, productId, taxId, mediumId, sourceId);
+                    await InsertInvoiceOdooV12(odooClient, partnerId, journalId, accountAnalyticId, accountIdInvoice, accountIdInvoiceLine, currencyId, productId, taxId, mediumId, sourceId);
                 }
             }
             catch (Exception ex)
@@ -451,8 +452,6 @@ namespace OdooIntegration.ConsoleApp
 
         private async static Task InsertInvoiceOdooV14(OdooClient odooClient, long partnerId, long journalId, long accountId, long currencyId, long productId, long taxId)
         {
-            
-
             var model = OdooDictionaryModel.Create(() => new AccountMoveOdooModel()
             {
                 PartnerId = partnerId,
@@ -508,7 +507,7 @@ namespace OdooIntegration.ConsoleApp
             }
         }
 
-        private async static Task InsertInvoiceOdooV12(OdooClient odooClient, long partnerId, long journalId, long accountAnalyticId, long accountId, long currencyId, long productId, long taxId, long mediumId, long sourceId)
+        private async static Task InsertInvoiceOdooV12(OdooClient odooClient, long partnerId, long journalId, long accountAnalyticId, long accountIdInvoice, long accountIdInvoiceLine, long currencyId, long productId, long taxId, long mediumId, long sourceId)
         {
             var model = OdooDictionaryModel.Create(() => new AccountInvoiceOdooModel()
             {
@@ -521,7 +520,7 @@ namespace OdooIntegration.ConsoleApp
                 State = StatusAccountInvoiceOdooEnum.Draft,
                 CurrencyId = currencyId,
                 JournalId = journalId,
-                AccountId = accountId,
+                AccountId = accountIdInvoice,
                 MediumId = mediumId,
                 SourceId = sourceId
             });
@@ -534,7 +533,7 @@ namespace OdooIntegration.ConsoleApp
                 var modelLine = OdooDictionaryModel.Create(() => new AccountInvoiceLineOdooModel()
                 {
                     InvoiceId = result.Id.Value,
-                    AccountId = accountId,
+                    AccountId = accountIdInvoiceLine,
                     Name = "PRUEBA",
                     Quantity = 1,
                     PriceUnit = 100,
