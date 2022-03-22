@@ -62,7 +62,9 @@
     <Compile Include="Models\AccountMoveLineOdooModel.cs" />
     <Compile Include="Models\AccountMoveOdooModel.cs" />
     <Compile Include="Models\AccountPaymentOdooModel.cs" />
+    <Compile Include="Models\AccountPaymentTermOdooModel.cs" />
     <Compile Include="Models\AccountTaxOdooModel.cs" />
+    <Compile Include="Models\CrmTeamOdooModel.cs" />
     <Compile Include="Models\FleetVehicleModelBrandOdooModel.cs" />
     <Compile Include="Models\FleetVehicleModelOdooModel.cs" />
     <Compile Include="Models\FleetVehicleOdooModel.cs" />

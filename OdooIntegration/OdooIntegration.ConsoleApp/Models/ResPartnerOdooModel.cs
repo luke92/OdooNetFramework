@@ -363,8 +363,8 @@ namespace OdooIntegration.ConsoleApp.Models
         [JsonProperty("contact_address_complete")]
         public string ContactAddressComplete { get; set; }
 
-        [JsonProperty("image_medium")]
-        public string ImageMedium { get; set; }
+        //[JsonProperty("image_medium")]
+        //public string ImageMedium { get; set; }
 
         [JsonProperty("phone_sanitized")]
         public string PhoneSanitized { get; set; }
@@ -417,8 +417,8 @@ namespace OdooIntegration.ConsoleApp.Models
         [JsonProperty("vat")]
         public string Vat { get; set; }
 
-        [JsonProperty("image_1920")]
-        public string Image1920 { get; set; }
+        //[JsonProperty("image_1920")]
+        //public string Image1920 { get; set; }
 
         [JsonProperty("l10n_ar_vat")]
         public string L10nArVat { get; set; }
@@ -440,6 +440,7 @@ namespace OdooIntegration.ConsoleApp.Models
         [JsonProperty("l10n_ar_special_purchase_document_type_ids")]
         public long[] L10nArSpecialPurchaseDocumentTypeIds { get; set; }
 
+        /*
         [JsonProperty("image_1024")]
         public string Image1024 { get; set; }
 
@@ -451,6 +452,7 @@ namespace OdooIntegration.ConsoleApp.Models
 
         [JsonProperty("image_128")]
         public string Image128 { get; set; }
+        */
 
         [JsonProperty("id")]
         public long Id { get; set; }
@@ -471,15 +473,360 @@ namespace OdooIntegration.ConsoleApp.Models
 
         [JsonProperty("__last_update")]
         public DateTime? LastUpdate { get; set; }
-    }
 
+        /// <summary>
+        /// customer - boolean  <br />
+        /// Required: False, Readonly: False, Store: True, Sortable: True <br />
+        /// Help: Check this box if this contact is a customer. It can be selected in sales orders. <br />
+        /// </summary>
+        [JsonProperty("customer")]
+        public bool? Customer { get; set; }
+
+        /// <summary>
+        /// supplier - boolean  <br />
+        /// Required: False, Readonly: False, Store: True, Sortable: True <br />
+        /// Help: Check this box if this contact is a vendor. It can be selected in purchase orders. <br />
+        /// </summary>
+        [JsonProperty("supplier")]
+        public bool? Supplier { get; set; }
+
+        /// <summary>
+        /// image - binary  <br />
+        /// Required: False, Readonly: False, Store: True, Sortable: False <br />
+        /// Help: This field holds the image used as avatar for this contact, limited to 1024x1024px <br />
+        /// </summary>
+        //[JsonProperty("image")]
+        //public string Image { get; set; }
+
+        /// <summary>
+        /// image_medium - binary  <br />
+        /// Required: False, Readonly: False, Store: True, Sortable: False <br />
+        /// Help: Medium-sized image of this contact. It is automatically resized as a 128x128px image, with aspect ratio preserved. Use this field in form views or some kanban views. <br />
+        /// </summary>
+        //[JsonProperty("image_medium")]
+        //public string ImageMedium { get; set; }
+
+        /// <summary>
+        /// image_small - binary  <br />
+        /// Required: False, Readonly: False, Store: True, Sortable: False <br />
+        /// Help: Small-sized image of this contact. It is automatically resized as a 64x64px image, with aspect ratio preserved. Use this field anywhere a small image is required. <br />
+        /// </summary>
+        //[JsonProperty("image_small")]
+        //public string ImageSmall { get; set; }
+
+        /// <summary>
+        /// calendar_last_notif_ack - datetime  <br />
+        /// Required: False, Readonly: False, Store: True, Sortable: True <br />
+        /// </summary>
+        [JsonProperty("calendar_last_notif_ack")]
+        public DateTime? CalendarLastNotifAck { get; set; }
+
+        /// <summary>
+        /// property_stock_customer - many2one - stock.location <br />
+        /// Required: False, Readonly: False, Store: False, Sortable: False <br />
+        /// Help: The stock location used as destination when sending goods to this contact. <br />
+        /// </summary>
+        [JsonProperty("property_stock_customer")]
+        public long? PropertyStockCustomer { get; set; }
+
+        /// <summary>
+        /// property_stock_supplier - many2one - stock.location <br />
+        /// Required: False, Readonly: False, Store: False, Sortable: False <br />
+        /// Help: The stock location used as source when receiving goods from this contact. <br />
+        /// </summary>
+        [JsonProperty("property_stock_supplier")]
+        public long? PropertyStockSupplier { get; set; }
+
+        /// <summary>
+        /// picking_warn - selection  <br />
+        /// Required: False, Readonly: False, Store: True, Sortable: True <br />
+        /// Help: Selecting the "Warning" option will notify user with the message, Selecting "Blocking Message" will throw an exception with the message and block the flow. The Message has to be written in the next field. <br />
+        /// </summary>
+        [JsonProperty("picking_warn")]
+        public StockPickingResPartnerOdooEnum? PickingWarn { get; set; }
+
+        /// <summary>
+        /// picking_warn_msg - text  <br />
+        /// Required: False, Readonly: False, Store: True, Sortable: True <br />
+        /// </summary>
+        [JsonProperty("picking_warn_msg")]
+        public string PickingWarnMsg { get; set; }
+
+        /// <summary>
+        /// contracts_count - integer  <br />
+        /// Required: False, Readonly: True, Store: False, Sortable: False <br />
+        /// </summary>
+        [JsonProperty("contracts_count")]
+        public int? ContractsCount { get; set; }
+
+        /// <summary>
+        /// team_id - many2one - crm.team <br />
+        /// Required: False, Readonly: False, Store: True, Sortable: True <br />
+        /// Help: If set, this Sales Team will be used for sales and assignations related to this partner <br />
+        /// </summary>
+        [JsonProperty("team_id")]
+        public long? TeamId { get; set; }
+
+        /// <summary>
+        /// opportunity_ids - one2many - crm.lead (partner_id) <br />
+        /// Required: False, Readonly: False, Store: True, Sortable: False <br />
+        /// </summary>
+        [JsonProperty("opportunity_ids")]
+        public long[] OpportunityIds { get; set; }
+
+        /// <summary>
+        /// meeting_ids - many2many - calendar.event <br />
+        /// Required: False, Readonly: False, Store: True, Sortable: False <br />
+        /// </summary>
+        [JsonProperty("meeting_ids")]
+        public long[] MeetingIds { get; set; }
+
+        /// <summary>
+        /// opportunity_count - integer  <br />
+        /// Required: False, Readonly: True, Store: False, Sortable: False <br />
+        /// </summary>
+        [JsonProperty("opportunity_count")]
+        public int? OpportunityCount { get; set; }
+
+        /// <summary>
+        /// meeting_count - integer  <br />
+        /// Required: False, Readonly: True, Store: False, Sortable: False <br />
+        /// </summary>
+        [JsonProperty("meeting_count")]
+        public int? MeetingCount { get; set; }
+
+        /// <summary>
+        /// task_ids - one2many - project.task (partner_id) <br />
+        /// Required: False, Readonly: False, Store: True, Sortable: False <br />
+        /// </summary>
+        [JsonProperty("task_ids")]
+        public long[] TaskIds { get; set; }
+
+        /// <summary>
+        /// task_count - integer  <br />
+        /// Required: False, Readonly: True, Store: False, Sortable: False <br />
+        /// </summary>
+        [JsonProperty("task_count")]
+        public int? TaskCount { get; set; }
+
+        /// <summary>
+        /// id_vend - boolean  <br />
+        /// Required: False, Readonly: False, Store: True, Sortable: True <br />
+        /// </summary>
+        [JsonProperty("id_vend")]
+        public bool? IdVend { get; set; }
+
+        /// <summary>
+        /// property_purchase_currency_id - many2one - res.currency <br />
+        /// Required: False, Readonly: False, Store: False, Sortable: False <br />
+        /// Help: This currency will be used, instead of the default one, for purchases from the current partner <br />
+        /// </summary>
+        [JsonProperty("property_purchase_currency_id")]
+        public long? PropertyPurchaseCurrencyId { get; set; }
+
+        /// <summary>
+        /// purchase_order_count - integer  <br />
+        /// Required: False, Readonly: True, Store: False, Sortable: False <br />
+        /// </summary>
+        [JsonProperty("purchase_order_count")]
+        public int? PurchaseOrderCount { get; set; }
+
+        /// <summary>
+        /// supplier_invoice_count - integer  <br />
+        /// Required: False, Readonly: True, Store: False, Sortable: False <br />
+        /// </summary>
+        [JsonProperty("supplier_invoice_count")]
+        public int? SupplierInvoiceCount { get; set; }
+
+        /// <summary>
+        /// purchase_warn - selection  <br />
+        /// Required: False, Readonly: False, Store: True, Sortable: True <br />
+        /// Help: Selecting the "Warning" option will notify user with the message, Selecting "Blocking Message" will throw an exception with the message and block the flow. The Message has to be written in the next field. <br />
+        /// </summary>
+        [JsonProperty("purchase_warn")]
+        public PurchaseOrderResPartnerOdooEnum? PurchaseWarn { get; set; }
+
+        /// <summary>
+        /// purchase_warn_msg - text  <br />
+        /// Required: False, Readonly: False, Store: True, Sortable: True <br />
+        /// </summary>
+        [JsonProperty("purchase_warn_msg")]
+        public string PurchaseWarnMsg { get; set; }
+
+        /// <summary>
+        /// payment_next_action_date - date  <br />
+        /// Required: False, Readonly: False, Store: False, Sortable: False <br />
+        /// Help: The date before which no action should be taken. <br />
+        /// </summary>
+        [JsonProperty("payment_next_action_date")]
+        public DateTime? PaymentNextActionDate { get; set; }
+
+        /// <summary>
+        /// unreconciled_aml_ids - one2many - account.move.line (partner_id) <br />
+        /// Required: False, Readonly: False, Store: True, Sortable: False <br />
+        /// </summary>
+        [JsonProperty("unreconciled_aml_ids")]
+        public long[] UnreconciledAmlIds { get; set; }
+
+        /// <summary>
+        /// partner_ledger_label - char  <br />
+        /// Required: False, Readonly: True, Store: False, Sortable: False <br />
+        /// </summary>
+        [JsonProperty("partner_ledger_label")]
+        public string PartnerLedgerLabel { get; set; }
+
+        /// <summary>
+        /// total_due - monetary  <br />
+        /// Required: False, Readonly: True, Store: False, Sortable: False <br />
+        /// </summary>
+        [JsonProperty("total_due")]
+        public decimal? TotalDue { get; set; }
+
+        /// <summary>
+        /// total_overdue - monetary  <br />
+        /// Required: False, Readonly: True, Store: False, Sortable: False <br />
+        /// </summary>
+        [JsonProperty("total_overdue")]
+        public decimal? TotalOverdue { get; set; }
+
+        /// <summary>
+        /// followup_status - selection  <br />
+        /// Required: False, Readonly: True, Store: False, Sortable: False <br />
+        /// </summary>
+        [JsonProperty("followup_status")]
+        public FollowupStatusResPartnerOdooEnum? FollowupStatus { get; set; }
+
+        /// <summary>
+        /// sale_order_count - integer  <br />
+        /// Required: False, Readonly: True, Store: False, Sortable: False <br />
+        /// </summary>
+        [JsonProperty("sale_order_count")]
+        public int? SaleOrderCount { get; set; }
+
+        /// <summary>
+        /// sale_order_ids - one2many - sale.order (partner_id) <br />
+        /// Required: False, Readonly: False, Store: True, Sortable: False <br />
+        /// </summary>
+        [JsonProperty("sale_order_ids")]
+        public long[] SaleOrderIds { get; set; }
+
+        /// <summary>
+        /// sale_warn - selection  <br />
+        /// Required: False, Readonly: False, Store: True, Sortable: True <br />
+        /// Help: Selecting the "Warning" option will notify user with the message, Selecting "Blocking Message" will throw an exception with the message and block the flow. The Message has to be written in the next field. <br />
+        /// </summary>
+        [JsonProperty("sale_warn")]
+        public SalesWarningsResPartnerOdooEnum? SaleWarn { get; set; }
+
+        /// <summary>
+        /// sale_warn_msg - text  <br />
+        /// Required: False, Readonly: False, Store: True, Sortable: True <br />
+        /// </summary>
+        [JsonProperty("sale_warn_msg")]
+        public string SaleWarnMsg { get; set; }
+
+        /// <summary>
+        /// payment_responsible_id - many2one - res.users <br />
+        /// Required: False, Readonly: False, Store: False, Sortable: False <br />
+        /// Help: Optionally you can assign a user to this field, which will make him responsible for the action. <br />
+        /// </summary>
+        [JsonProperty("payment_responsible_id")]
+        public long? PaymentResponsibleId { get; set; }
+
+        /// <summary>
+        /// fax_no - char  <br />
+        /// Required: False, Readonly: False, Store: True, Sortable: True <br />
+        /// </summary>
+        [JsonProperty("fax_no")]
+        public string FaxNo { get; set; }
+
+        /// <summary>
+        /// fax_code - char  <br />
+        /// Required: False, Readonly: False, Store: True, Sortable: True <br />
+        /// </summary>
+        [JsonProperty("fax_code")]
+        public string FaxCode { get; set; }
+
+        /// <summary>
+        /// province_id - many2one - province <br />
+        /// Required: False, Readonly: False, Store: True, Sortable: True <br />
+        /// </summary>
+        [JsonProperty("province_id")]
+        public long? ProvinceId { get; set; }
+
+        /// <summary>
+        /// canton_id - many2one - canton <br />
+        /// Required: False, Readonly: False, Store: True, Sortable: True <br />
+        /// </summary>
+        [JsonProperty("canton_id")]
+        public long? CantonId { get; set; }
+
+        /// <summary>
+        /// district_id - many2one - district <br />
+        /// Required: False, Readonly: False, Store: True, Sortable: True <br />
+        /// </summary>
+        [JsonProperty("district_id")]
+        public long? DistrictId { get; set; }
+
+        /// <summary>
+        /// locality_id - many2one - locality <br />
+        /// Required: False, Readonly: False, Store: True, Sortable: True <br />
+        /// </summary>
+        [JsonProperty("locality_id")]
+        public long? LocalityId { get; set; }
+
+        /// <summary>
+        /// phone_code - char  <br />
+        /// Required: False, Readonly: False, Store: True, Sortable: True <br />
+        /// </summary>
+        [JsonProperty("phone_code")]
+        public string PhoneCode { get; set; }
+
+        /// <summary>
+        /// tipo - selection  <br />
+        /// Required: False, Readonly: False, Store: True, Sortable: True <br />
+        /// </summary>
+        [JsonProperty("tipo")]
+        public TipoResPartnerOdooEnum? Tipo { get; set; }
+
+        /// <summary>
+        /// extranjero - boolean  <br />
+        /// Required: False, Readonly: False, Store: True, Sortable: True <br />
+        /// </summary>
+        [JsonProperty("extranjero")]
+        public bool? Extranjero { get; set; }
+
+        /// <summary>
+        /// cedula_extranjero - char  <br />
+        /// Required: False, Readonly: False, Store: True, Sortable: True <br />
+        /// </summary>
+        [JsonProperty("cedula_extranjero")]
+        public string CedulaExtranjero { get; set; }
+
+        /// <summary>
+        /// over_credit - boolean  <br />
+        /// Required: False, Readonly: False, Store: True, Sortable: True <br />
+        /// </summary>
+        [JsonProperty("over_credit")]
+        public bool? OverCredit { get; set; }
+
+        /// <summary>
+        /// x_driver_id__fleet_vehicle_count - integer  <br />
+        /// Required: False, Readonly: False, Store: False, Sortable: False <br />
+        /// </summary>
+        [JsonProperty("x_driver_id__fleet_vehicle_count")]
+        public int? XDriverIdFleetVehicleCount { get; set; }
+    }
 
     // All the emails and documents sent to this contact will be translated in this language.
     [JsonConverter(typeof(StringEnumConverter))]
     public enum LanguageResPartnerOdooEnum
     {
+        [EnumMember(Value = "en_US")]
+        English = 1,
+
         [EnumMember(Value = "es_ES")]
-        SpanishEspaOl = 1,
+        SpanishEspaOl = 2,
     }
 
 
@@ -2370,6 +2717,89 @@ namespace OdooIntegration.ConsoleApp.Models
 
         [EnumMember(Value = "exempt")]
         Exempt = 3,
+    }
+
+
+
+    /// <summary>
+    /// Help: Selecting the "Warning" option will notify user with the message, Selecting "Blocking Message" will throw an exception with the message and block the flow. The Message has to be written in the next field.
+    /// </summary>
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum StockPickingResPartnerOdooEnum
+    {
+        [EnumMember(Value = "no-message")]
+        NoMessage = 1,
+
+        [EnumMember(Value = "warning")]
+        Warning = 2,
+
+        [EnumMember(Value = "block")]
+        BlockingMessage = 3,
+    }
+
+    /// <summary>
+    /// Help: Selecting the "Warning" option will notify user with the message, Selecting "Blocking Message" will throw an exception with the message and block the flow. The Message has to be written in the next field.
+    /// </summary>
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum PurchaseOrderResPartnerOdooEnum
+    {
+        [EnumMember(Value = "no-message")]
+        NoMessage = 1,
+
+        [EnumMember(Value = "warning")]
+        Warning = 2,
+
+        [EnumMember(Value = "block")]
+        BlockingMessage = 3,
+    }
+
+    /// <summary>
+    /// </summary>
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum FollowupStatusResPartnerOdooEnum
+    {
+        [EnumMember(Value = "in_need_of_action")]
+        InNeedOfAction = 1,
+
+        [EnumMember(Value = "with_overdue_invoices")]
+        WithOverdueInvoices = 2,
+
+        [EnumMember(Value = "no_action_needed")]
+        NoActionNeeded = 3,
+    }
+
+    /// <summary>
+    /// Help: Selecting the "Warning" option will notify user with the message, Selecting "Blocking Message" will throw an exception with the message and block the flow. The Message has to be written in the next field.
+    /// </summary>
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum SalesWarningsResPartnerOdooEnum
+    {
+        [EnumMember(Value = "no-message")]
+        NoMessage = 1,
+
+        [EnumMember(Value = "warning")]
+        Warning = 2,
+
+        [EnumMember(Value = "block")]
+        BlockingMessage = 3,
+    }
+
+    /// <summary>
+    /// </summary>
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum TipoResPartnerOdooEnum
+    {
+        [EnumMember(Value = "01")]
+        CeDulaFiSica = 1,
+
+        [EnumMember(Value = "02")]
+        CeDulaJuriDica = 2,
+
+        [EnumMember(Value = "03")]
+        DIMEX = 3,
+
+        [EnumMember(Value = "04")]
+        NITE = 4,
     }
 
 }

@@ -82,19 +82,26 @@ namespace OdooIntegration.ConsoleApp.Helpers
             return result.Value.Id;
         }
 
-        private static OdooQueryBuilder<AccountAccountOdooModel> GetAccountQuery(OdooRepository<AccountAccountOdooModel> repository, InternalTypeAccountAccountOdooEnum? internalType = null, InternalGroupAccountAccountOdooEnum? internalGroup = null)
+        public async static Task<long> GetJournalLastId(OdooRepository<AccountJournalOdooModel> repository, TypeAccountJournalOdooEnum? typeAccountJournal = null, long? currencyId = null)
         {
-            var query = repository.Query();
-            if (internalType.HasValue)
-            {
-                query = query.Where(x => x.InternalType, PortaCapena.OdooJsonRpcClient.Consts.OdooOperator.EqualsTo, internalType);
-            }
-            if (internalGroup.HasValue)
-            {
-                query = query.Where(x => x.InternalGroup, PortaCapena.OdooJsonRpcClient.Consts.OdooOperator.EqualsTo, internalGroup);
-            }
+            var query = GetJournalQuery(repository, typeAccountJournal, currencyId);
+            query = query.OrderByDescending(x => x.Id);
+            var result = await query.FirstOrDefaultAsync();
+            return result.Value.Id;
+        }
 
-            return query.Select(x => x.Id);
+        public async static Task<long> GetJournalFirstId(OdooRepository<AccountJournalOdooModel> repository, TypeAccountJournalOdooEnum? typeAccountJournal = null, long? currencyId = null)
+        {
+            var query = GetJournalQuery(repository, typeAccountJournal, currencyId);
+            query = query.OrderBy(x => x.Id);
+            var result = await query.FirstOrDefaultAsync();
+            return result.Value.Id;
+        }
+
+        public async static Task<long> GetVendorFirstId(OdooRepository<ResPartnerOdooModel> repository)
+        {
+            var result = await repository.Query().Where(x => x.IdVend, PortaCapena.OdooJsonRpcClient.Consts.OdooOperator.EqualsTo, true).OrderBy(x => x.Id).Select(x => x.Id).FirstOrDefaultAsync();
+            return result.Value.Id;
         }
 
         public async static Task<long?> AddModelAndReturnIdAsync<T>(OdooDictionaryModel<T> model, OdooClient odooClient) where T : IOdooModel, new()
@@ -171,6 +178,39 @@ namespace OdooIntegration.ConsoleApp.Helpers
                     message += ". " + odooResult.Error.Data.Message;
             }
             return message;
+        }
+
+        private static OdooQueryBuilder<AccountAccountOdooModel> GetAccountQuery(OdooRepository<AccountAccountOdooModel> repository, InternalTypeAccountAccountOdooEnum? internalType = null, InternalGroupAccountAccountOdooEnum? internalGroup = null)
+        {
+            var query = repository.Query();
+            if (internalType.HasValue)
+            {
+                query = query.Where(x => x.InternalType, PortaCapena.OdooJsonRpcClient.Consts.OdooOperator.EqualsTo, internalType);
+            }
+            if (internalGroup.HasValue)
+            {
+                query = query.Where(x => x.InternalGroup, PortaCapena.OdooJsonRpcClient.Consts.OdooOperator.EqualsTo, internalGroup);
+            }
+
+            return query.Select(x => x.Id);
+        }
+
+        private static OdooQueryBuilder<AccountJournalOdooModel> GetJournalQuery(OdooRepository<AccountJournalOdooModel> repository, TypeAccountJournalOdooEnum? typeAccountJournal = null, long? currencyId = null)
+        {
+            var query = repository.Query();
+            if (typeAccountJournal.HasValue)
+            {
+                query = query.Where(x => x.Type, PortaCapena.OdooJsonRpcClient.Consts.OdooOperator.EqualsTo, typeAccountJournal);
+            }
+            if (currencyId.HasValue)
+            {
+                query = query.Where(x => x.CurrencyId, PortaCapena.OdooJsonRpcClient.Consts.OdooOperator.EqualsTo, currencyId);
+            }
+
+            query = query.Where(x => x.RefundSequence, PortaCapena.OdooJsonRpcClient.Consts.OdooOperator.EqualsTo, true);
+            query = query.Where(x => x.UpdatePosted, PortaCapena.OdooJsonRpcClient.Consts.OdooOperator.EqualsTo, true);
+
+            return query.Select(x => x.Id);
         }
     }
 
