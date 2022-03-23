@@ -103,19 +103,7 @@ namespace OdooIntegration.ConsoleApp
 
         public static OdooClient GetClient()
         {
-            var host = ConfigurationManager.AppSettings["host"];
-            var database = ConfigurationManager.AppSettings["database"];
-            var user = ConfigurationManager.AppSettings["username"];
-            var pass = ConfigurationManager.AppSettings["password"];
-
-            var config = new OdooConfig(
-                apiUrl: host,
-                dbName: database,
-                userName: user,
-                password: pass
-            );
-
-            return new OdooClient(config);
+            return new OdooClient(GetConfig());
         }
 
         public async static Task PrintLogin(OdooClient odooClient)
@@ -577,7 +565,7 @@ namespace OdooIntegration.ConsoleApp
 
             if (invoiceLineId.HasValue)
             {
-                //await UpdateInvoiceOdooV12(odooClient, result.Id);
+                await ValidateInvoiceOdooV12(odooClient, result.Id);
             }
         }
 
@@ -624,17 +612,15 @@ namespace OdooIntegration.ConsoleApp
             Console.WriteLine(JsonConvert.SerializeObject(result3));
         }
 
-        private async static Task UpdateInvoiceOdooV12(OdooClient odooClient, long? invoiceId)
+        private async static Task ValidateInvoiceOdooV12(OdooClient odooClient, long? invoiceId)
         {
             if (!invoiceId.HasValue) return;
 
-            var modelUpdate = OdooDictionaryModel.Create(() => new AccountInvoiceOdooModel()
-            {
-                State = StatusAccountInvoiceOdooEnum.Open,
-            });
+            var method = new OdooMethod(GetConfig(), "account.invoice");
 
-            var result3 = await OdooHelper.UpdateModelAsync(modelUpdate, invoiceId.Value, odooClient);
-            Console.WriteLine(JsonConvert.SerializeObject(result3));
+            var result = await method.CallAsync<long>("action_invoice_open", invoiceId);
+
+            Console.WriteLine(JsonConvert.SerializeObject(result));
         }
 
         private async static Task PrintInvoiceData(OdooClient odooClient)
@@ -724,6 +710,23 @@ namespace OdooIntegration.ConsoleApp
                 var account = await OdooHelper.GetAsync(repository, accountId.Value);
                 Console.WriteLine(JsonConvert.SerializeObject(account));
             }
+        }
+
+        private static OdooConfig GetConfig()
+        {
+            var host = ConfigurationManager.AppSettings["host"];
+            var database = ConfigurationManager.AppSettings["database"];
+            var user = ConfigurationManager.AppSettings["username"];
+            var pass = ConfigurationManager.AppSettings["password"];
+
+            var config = new OdooConfig(
+                apiUrl: host,
+                dbName: database,
+                userName: user,
+                password: pass
+            );
+
+            return config;
         }
     }
 }

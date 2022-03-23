@@ -52,6 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Helpers\OdooHelper.cs" />
+    <Compile Include="Helpers\OdooMethod.cs" />
     <Compile Include="Models\AccountAccountOdooModel.cs" />
     <Compile Include="Models\AccountAnalyticAccountOdooModel.cs" />
     <Compile Include="Models\AccountAnalyticGroupOdooModel.cs" />
