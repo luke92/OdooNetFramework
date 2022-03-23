@@ -54,11 +54,25 @@ namespace OdooIntegration.ConsoleApp.Helpers
             return result.Value;
         }
 
+        public async static Task<T> GetFirst<T>(OdooRepository<T> repository, long? companyId = null) where T : IOdooModel, new()
+        {
+            var query = GetQuery(repository, companyId);
+            var result = await query.OrderBy(x => x.Id).FirstOrDefaultAsync();
+            return result.Value;
+        }
+
         public async static Task<long> GetFirstId<T>(OdooRepository<T> repository, long? companyId = null) where T : IOdooModel, new()
         {
             var query = GetQuery(repository, companyId);
             var result = await query.OrderBy(x => x.Id).Select(x => x.Id).FirstOrDefaultAsync();
             return result.Value.Id;
+        }
+
+        public async static Task<T> GetLast<T>(OdooRepository<T> repository, long? companyId = null) where T : IOdooModel, new()
+        {
+            var query = GetQuery(repository, companyId);
+            var result = await query.OrderByDescending(x => x.Id).FirstOrDefaultAsync();
+            return result.Value;
         }
 
         public async static Task<long> GetLastId<T>(OdooRepository<T> repository, long? companyId = null) where T : IOdooModel, new()
@@ -105,6 +119,33 @@ namespace OdooIntegration.ConsoleApp.Helpers
             var query = GetQuery(repository, companyId);
             var result = await query.Where(x => x.IdVend, PortaCapena.OdooJsonRpcClient.Consts.OdooOperator.EqualsTo, true).OrderBy(x => x.Id).Select(x => x.Id).FirstOrDefaultAsync();
             return result.Value.Id;
+        }
+
+        public async static Task<long> GetCustomerLastId(OdooRepository<ResPartnerOdooModel> repository, long? companyId = null)
+        {
+            var query = GetQuery(repository, companyId);
+            var result = await query.Where(x => x.Customer, PortaCapena.OdooJsonRpcClient.Consts.OdooOperator.EqualsTo, true).OrderByDescending(x => x.Id).Select(x => x.Id).FirstOrDefaultAsync();
+            return result.Value.Id;
+        }
+
+        public async static Task<ProductProductOdooModel> GetProdouctForSale(OdooRepository<ProductProductOdooModel> repository, bool getLast = true, long? companyId = null)
+        {
+            var query = GetQuery(repository, companyId);
+            query = query.Where(x => x.SaleOk, PortaCapena.OdooJsonRpcClient.Consts.OdooOperator.EqualsTo, true);
+            query = query.Where(x => x.Type, PortaCapena.OdooJsonRpcClient.Consts.OdooOperator.EqualsTo, ProductTypeProductProductOdooEnum.Service);
+            query = query.Where(x => x.PurchaseOk, PortaCapena.OdooJsonRpcClient.Consts.OdooOperator.EqualsTo, false);
+
+            if (getLast)
+            {
+                query = query.OrderByDescending(x => x.Id);
+            }
+            else
+            {
+                query = query.OrderBy(x => x.Id);
+            }
+
+            var result = await query.FirstOrDefaultAsync();
+            return result.Value;
         }
 
         public async static Task<long?> AddModelAndReturnIdAsync<T>(OdooDictionaryModel<T> model, OdooClient odooClient) where T : IOdooModel, new()
