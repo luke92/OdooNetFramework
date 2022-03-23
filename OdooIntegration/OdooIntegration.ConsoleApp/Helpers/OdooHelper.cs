@@ -54,53 +54,56 @@ namespace OdooIntegration.ConsoleApp.Helpers
             return result.Value;
         }
 
-        public async static Task<long> GetFirstId<T>(OdooRepository<T> repository) where T : IOdooModel, new()
+        public async static Task<long> GetFirstId<T>(OdooRepository<T> repository, long? companyId = null) where T : IOdooModel, new()
         {
-            var result = await repository.Query().OrderBy(x => x.Id).Select(x => x.Id).FirstOrDefaultAsync();
+            var query = GetQuery(repository, companyId);
+            var result = await query.OrderBy(x => x.Id).Select(x => x.Id).FirstOrDefaultAsync();
             return result.Value.Id;
         }
 
-        public async static Task<long> GetLastId<T>(OdooRepository<T> repository) where T : IOdooModel, new()
+        public async static Task<long> GetLastId<T>(OdooRepository<T> repository, long? companyId = null) where T : IOdooModel, new()
         {
-            var result = await repository.Query().OrderByDescending(x => x.Id).Select(x => x.Id).FirstOrDefaultAsync();
+            var query = GetQuery(repository, companyId);
+            var result = await query.OrderByDescending(x => x.Id).Select(x => x.Id).FirstOrDefaultAsync();
             return result.Value.Id;
         }
 
-        public async static Task<long> GetAccountLastId(OdooRepository<AccountAccountOdooModel> repository, InternalTypeAccountAccountOdooEnum? internalType = null, InternalGroupAccountAccountOdooEnum? internalGroup = null)
+        public async static Task<long> GetAccountLastId(OdooRepository<AccountAccountOdooModel> repository, long? companyId = null, InternalTypeAccountAccountOdooEnum? internalType = null, InternalGroupAccountAccountOdooEnum? internalGroup = null)
         {
-            var query = GetAccountQuery(repository, internalType, internalGroup);
+            var query = GetAccountQuery(repository, companyId, internalType, internalGroup);
             query = query.OrderByDescending(x => x.Id);
             var result = await query.FirstOrDefaultAsync();
             return result.Value.Id;
         }
 
-        public async static Task<long> GetAccountFirstId(OdooRepository<AccountAccountOdooModel> repository, InternalTypeAccountAccountOdooEnum? internalType = null, InternalGroupAccountAccountOdooEnum? internalGroup = null)
+        public async static Task<long> GetAccountFirstId(OdooRepository<AccountAccountOdooModel> repository, long? companyId = null, InternalTypeAccountAccountOdooEnum? internalType = null, InternalGroupAccountAccountOdooEnum? internalGroup = null)
         {
-            var query = GetAccountQuery(repository, internalType, internalGroup);
+            var query = GetAccountQuery(repository, companyId, internalType, internalGroup);
             query = query.OrderBy(x => x.Id);
             var result = await query.FirstOrDefaultAsync();
             return result.Value.Id;
         }
 
-        public async static Task<long> GetJournalLastId(OdooRepository<AccountJournalOdooModel> repository, TypeAccountJournalOdooEnum? typeAccountJournal = null, long? currencyId = null)
+        public async static Task<long> GetJournalLastId(OdooRepository<AccountJournalOdooModel> repository, long? companyId = null, TypeAccountJournalOdooEnum? typeAccountJournal = null, long? currencyId = null)
         {
-            var query = GetJournalQuery(repository, typeAccountJournal, currencyId);
+            var query = GetJournalQuery(repository, companyId, typeAccountJournal, currencyId);
             query = query.OrderByDescending(x => x.Id);
             var result = await query.FirstOrDefaultAsync();
             return result.Value.Id;
         }
 
-        public async static Task<long> GetJournalFirstId(OdooRepository<AccountJournalOdooModel> repository, TypeAccountJournalOdooEnum? typeAccountJournal = null, long? currencyId = null)
+        public async static Task<long> GetJournalFirstId(OdooRepository<AccountJournalOdooModel> repository, long? companyId = null, TypeAccountJournalOdooEnum? typeAccountJournal = null, long? currencyId = null)
         {
-            var query = GetJournalQuery(repository, typeAccountJournal, currencyId);
+            var query = GetJournalQuery(repository, companyId, typeAccountJournal, currencyId);
             query = query.OrderBy(x => x.Id);
             var result = await query.FirstOrDefaultAsync();
             return result.Value.Id;
         }
 
-        public async static Task<long> GetVendorFirstId(OdooRepository<ResPartnerOdooModel> repository)
+        public async static Task<long> GetVendorFirstId(OdooRepository<ResPartnerOdooModel> repository, long? companyId = null)
         {
-            var result = await repository.Query().Where(x => x.IdVend, PortaCapena.OdooJsonRpcClient.Consts.OdooOperator.EqualsTo, true).OrderBy(x => x.Id).Select(x => x.Id).FirstOrDefaultAsync();
+            var query = GetQuery(repository, companyId);
+            var result = await query.Where(x => x.IdVend, PortaCapena.OdooJsonRpcClient.Consts.OdooOperator.EqualsTo, true).OrderBy(x => x.Id).Select(x => x.Id).FirstOrDefaultAsync();
             return result.Value.Id;
         }
 
@@ -180,9 +183,9 @@ namespace OdooIntegration.ConsoleApp.Helpers
             return message;
         }
 
-        private static OdooQueryBuilder<AccountAccountOdooModel> GetAccountQuery(OdooRepository<AccountAccountOdooModel> repository, InternalTypeAccountAccountOdooEnum? internalType = null, InternalGroupAccountAccountOdooEnum? internalGroup = null)
+        private static OdooQueryBuilder<AccountAccountOdooModel> GetAccountQuery(OdooRepository<AccountAccountOdooModel> repository, long? companyId = null, InternalTypeAccountAccountOdooEnum? internalType = null, InternalGroupAccountAccountOdooEnum? internalGroup = null)
         {
-            var query = repository.Query();
+            var query = GetQuery(repository, companyId);
             if (internalType.HasValue)
             {
                 query = query.Where(x => x.InternalType, PortaCapena.OdooJsonRpcClient.Consts.OdooOperator.EqualsTo, internalType);
@@ -191,13 +194,12 @@ namespace OdooIntegration.ConsoleApp.Helpers
             {
                 query = query.Where(x => x.InternalGroup, PortaCapena.OdooJsonRpcClient.Consts.OdooOperator.EqualsTo, internalGroup);
             }
-
             return query.Select(x => x.Id);
         }
 
-        private static OdooQueryBuilder<AccountJournalOdooModel> GetJournalQuery(OdooRepository<AccountJournalOdooModel> repository, TypeAccountJournalOdooEnum? typeAccountJournal = null, long? currencyId = null)
+        private static OdooQueryBuilder<AccountJournalOdooModel> GetJournalQuery(OdooRepository<AccountJournalOdooModel> repository, long? companyId = null, TypeAccountJournalOdooEnum? typeAccountJournal = null, long? currencyId = null)
         {
-            var query = repository.Query();
+            var query = GetQuery(repository, companyId);
             if (typeAccountJournal.HasValue)
             {
                 query = query.Where(x => x.Type, PortaCapena.OdooJsonRpcClient.Consts.OdooOperator.EqualsTo, typeAccountJournal);
@@ -211,6 +213,18 @@ namespace OdooIntegration.ConsoleApp.Helpers
             query = query.Where(x => x.UpdatePosted, PortaCapena.OdooJsonRpcClient.Consts.OdooOperator.EqualsTo, true);
 
             return query.Select(x => x.Id);
+        }
+
+        private static OdooQueryBuilder<T> GetQuery<T>(OdooRepository<T> repository, long? companyId = null) where T : IOdooModel, new()
+        {
+            var query = repository.Query();
+            if (companyId.HasValue && companyId.Value > 0)
+            {
+                var filter = OdooFilter.Create()
+                .EqualTo("company_id", companyId.Value);
+                query = query.Where(filter);
+            }
+            return query;
         }
     }
 

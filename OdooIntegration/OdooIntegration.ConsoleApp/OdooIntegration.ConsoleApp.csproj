@@ -71,6 +71,7 @@
     <Compile Include="Models\L10nLatamIdentificationTypeOdooModel.cs" />
     <Compile Include="Models\ProductProductOdooModel.cs" />
     <Compile Include="Models\ProductTemplateOdooModel.cs" />
+    <Compile Include="Models\ResCompanyOdooModel.cs" />
     <Compile Include="Models\ResCurrencyOdooModel.cs" />
     <Compile Include="Models\ResPartnerOdooModel.cs" />
     <Compile Include="Models\UtmMediumOdooModel.cs" />
