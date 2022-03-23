@@ -565,7 +565,7 @@ namespace OdooIntegration.ConsoleApp
 
             if (invoiceLineId.HasValue)
             {
-                await ValidateInvoiceOdooV12(odooClient, result.Id);
+                await ValidateInvoiceOdooV12(result.Id);
             }
         }
 
@@ -612,7 +612,7 @@ namespace OdooIntegration.ConsoleApp
             Console.WriteLine(JsonConvert.SerializeObject(result3));
         }
 
-        private async static Task ValidateInvoiceOdooV12(OdooClient odooClient, long? invoiceId)
+        private async static Task ValidateInvoiceOdooV12(long? invoiceId)
         {
             if (!invoiceId.HasValue) return;
 
