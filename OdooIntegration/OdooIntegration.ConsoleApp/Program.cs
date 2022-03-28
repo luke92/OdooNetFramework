@@ -38,6 +38,9 @@ namespace OdooIntegration.ConsoleApp
 
                 switch(option)
                 {
+                    case "4":
+                        await PrintTaxData(odooClient);
+                        break;
                     case "3":
                         await PrintInvoiceData(odooClient);
                         break;
@@ -63,9 +66,26 @@ namespace OdooIntegration.ConsoleApp
             Console.WriteLine("1) Print Records of Models");
             Console.WriteLine("2) Insert Invoice Line Test");
             Console.WriteLine("3) Print Invoice by Id");
+            Console.WriteLine("4) Print Tax by Id");
             var key = Console.ReadLine();
             Console.WriteLine("");
             return key;
+        }
+
+        private async static Task PrintTaxData(OdooClient odooClient)
+        {
+            var idString = "";
+            var taxId = 0l;
+            do
+            {
+                Console.WriteLine("Enter Tax ID");
+                idString = Console.ReadLine();
+            } while (!long.TryParse(idString, out taxId));
+
+            Console.WriteLine("Tax ID: " + taxId);
+            var repository = new OdooRepository<AccountTaxOdooModel>(odooClient.Config);
+            var tax = await OdooHelper.GetAsync(repository, taxId);
+            Console.WriteLine(JsonConvert.SerializeObject(tax));
         }
 
         public async static Task PrintRecordsModelsAsync(OdooClient odooClient)
@@ -573,7 +593,7 @@ namespace OdooIntegration.ConsoleApp
                 var modelLine = OdooDictionaryModel.Create(() => new AccountInvoiceLineOdooModel()
                 {
                     InvoiceId = invoiceId.Value,
-                    Name = "PRUEBA",
+                    Name = "TEST",
                     AccountId = accountIdInvoiceLine,
                     Quantity = 1,
                     PriceUnit = 100,

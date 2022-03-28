@@ -34,6 +34,7 @@ namespace OdooIntegration.ConsoleApp.Helpers
         }
 
         /*
+         * Example of use
             _transactionMethod = new OdooMethod(_odooSettings.GetOdooConfig(), "sale.order");
             var result = await _transactionMethod.CallAsync<long>("create_transaction", dict); 
          */
