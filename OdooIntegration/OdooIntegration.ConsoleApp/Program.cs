@@ -602,8 +602,7 @@ namespace OdooIntegration.ConsoleApp
                     CreateDate = DateTime.Now,
                     WriteDate = DateTime.Now,
                     LastUpdate = DateTime.Now,
-                    CompanyId = companyId,
-                    InvoiceLineTaxIds = taxesId
+                    CompanyId = companyId
                 });
 
                 var result = await OdooHelper.AddModelAsync(modelLine, odooClient);
