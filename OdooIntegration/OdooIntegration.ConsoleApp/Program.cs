@@ -554,7 +554,7 @@ namespace OdooIntegration.ConsoleApp
             if (invoiceId.HasValue)
             {
                 var invoiceLineId = await InsertInvoiceLineOdooV12(odooClient, companyId, invoiceId, accountIdInvoiceLine, productId, accountAnalyticId, taxesId);
-                await ValidateInvoiceOdooV12(result.Id);
+                await ValidateInvoiceOdooV12(invoiceId);
             }
         }
 
