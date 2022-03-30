@@ -549,6 +549,18 @@ namespace OdooIntegration.ConsoleApp
 
         private async static Task InsertInvoiceOdooV12(OdooClient odooClient, long companyId, long partnerId, long journalId, long accountAnalyticId, long accountIdInvoice, long accountIdInvoiceLine, long currencyId, long productId, long[] taxesId, long mediumId, long sourceId, long accountPaymentTermId, long vendorId, long teamCrmId, long fleetId)
         {
+            var invoiceId = await InsertInvoiceHeaderOdooV12(odooClient, companyId, partnerId, journalId, accountIdInvoice, currencyId, mediumId, sourceId, accountPaymentTermId, vendorId, teamCrmId, fleetId, null);
+
+            if (invoiceId.HasValue)
+            {
+                var invoiceLineId = await InsertInvoiceLineOdooV12(odooClient, companyId, invoiceId, accountIdInvoiceLine, productId, accountAnalyticId, taxesId);
+                await ValidateInvoiceOdooV12(result.Id);
+            }
+        }
+
+        private async static Task<long?> InsertInvoiceHeaderOdooV12(OdooClient odooClient, long companyId, long partnerId, long journalId, long accountIdInvoice, long currencyId, long mediumId, long sourceId, long accountPaymentTermId, long vendorId, long teamCrmId, long fleetId, long? invoiceLineId)
+        {
+            var invoiceLineIds = invoiceLineId.HasValue ? new long[] { invoiceLineId.Value } : new long[] {};
             var model = OdooDictionaryModel.Create(() => new AccountInvoiceOdooModel()
             {
                 PartnerId = partnerId,
@@ -573,44 +585,37 @@ namespace OdooIntegration.ConsoleApp
                 SucursalEntrega = SucursalDeEntregaAccountInvoiceOdooEnum.OficinaCentral,
                 Fleet = fleetId,
                 CompanyId = companyId,
+                InvoiceLineIds = invoiceLineIds
             });
 
             var result = await OdooHelper.AddModelAsync(model, odooClient);
             Console.WriteLine(JsonConvert.SerializeObject(result));
 
-            var invoiceLineId = await InsertInvoiceLineOdooV12(odooClient, companyId, result.Id, accountIdInvoiceLine, productId, accountAnalyticId, taxesId);
-
-            if (invoiceLineId.HasValue)
-            {
-                await ValidateInvoiceOdooV12(result.Id);
-            }
+            return result.Id;
         }
 
         private async static Task<long?> InsertInvoiceLineOdooV12(OdooClient odooClient, long companyId, long? invoiceId, long accountIdInvoiceLine, long productId, long accountAnalyticId, long[] taxesId)
         {
-            if (invoiceId.HasValue)
+            var modelLine = OdooDictionaryModel.Create(() => new AccountInvoiceLineOdooModel()
             {
-                var modelLine = OdooDictionaryModel.Create(() => new AccountInvoiceLineOdooModel()
-                {
-                    InvoiceId = invoiceId.Value,
-                    Name = "TEST",
-                    AccountId = accountIdInvoiceLine,
-                    Quantity = 1,
-                    PriceUnit = 100,
-                    ProductId = productId,
-                    AccountAnalyticId = accountAnalyticId,
-                    CreateDate = DateTime.Now,
-                    WriteDate = DateTime.Now,
-                    LastUpdate = DateTime.Now,
-                    CompanyId = companyId
-                });
+                InvoiceId = invoiceId,
+                Name = "TEST",
+                AccountId = accountIdInvoiceLine,
+                Quantity = 1,
+                PriceUnit = 100,
+                ProductId = productId,
+                AccountAnalyticId = accountAnalyticId,
+                CreateDate = DateTime.Now,
+                WriteDate = DateTime.Now,
+                LastUpdate = DateTime.Now,
+                CompanyId = companyId,
+                InvoiceLineTaxIds = taxesId
+            });
 
-                var result = await OdooHelper.AddModelAsync(modelLine, odooClient);
-                Console.WriteLine(JsonConvert.SerializeObject(result));
+            var result = await OdooHelper.AddModelAsync(modelLine, odooClient);
+            Console.WriteLine(JsonConvert.SerializeObject(result));
 
-                return result.Id;
-            }
-            return null;
+            return result.Id;
         }
 
         private async static Task ValidateInvoiceOdooV12(long? invoiceId)
