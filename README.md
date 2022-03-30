@@ -1,5 +1,5 @@
 # OdooNetFramework
-Test Odoo with net framework 4.7.2 using ODOO V14 Cloud
+Test Odoo with net framework 4.7.2 using ODOO V12 and V14 Cloud
 
 ## Packages used
 - https://github.com/patricoos/PortaCapena.OdooJsonRpcClient
