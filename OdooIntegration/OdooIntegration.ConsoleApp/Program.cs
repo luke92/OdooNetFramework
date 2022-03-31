@@ -550,12 +550,14 @@ namespace OdooIntegration.ConsoleApp
         private async static Task InsertInvoiceOdooV12(OdooClient odooClient, long companyId, long partnerId, long journalId, long accountAnalyticId, long accountIdInvoice, long accountIdInvoiceLine, long currencyId, long productId, long[] taxesId, long mediumId, long sourceId, long accountPaymentTermId, long vendorId, long teamCrmId, long fleetId)
         {
             var invoiceId = await InsertInvoiceHeaderOdooV12(odooClient, companyId, partnerId, journalId, accountIdInvoice, currencyId, mediumId, sourceId, accountPaymentTermId, vendorId, teamCrmId, fleetId, null);
-
+            var priceUnit = 100d;
+            var quantity = 1d;
+            var amountTax = priceUnit / 100 * 15;
             if (invoiceId.HasValue)
             {
-                var invoiceLineId = await InsertInvoiceLineOdooV12(odooClient, companyId, invoiceId, accountIdInvoiceLine, productId, accountAnalyticId, taxesId);
-                //await AddTaxesToInvoiceLineOdooV12(invoiceLineId.Value, taxesId);
-                await ValidateInvoiceOdooV12(invoiceId);
+                var invoiceLineId = await InsertInvoiceLineOdooV12(odooClient, companyId, invoiceId, accountIdInvoiceLine, productId, accountAnalyticId, taxesId, priceUnit, quantity);
+                var taxLineId = await InsertTaxLineOdooV12(odooClient, invoiceId.Value, taxesId.FirstOrDefault(), (decimal)amountTax, currencyId);
+                //await ValidateInvoiceOdooV12(invoiceId);
             }
         }
 
@@ -595,15 +597,15 @@ namespace OdooIntegration.ConsoleApp
             return result.Id;
         }
 
-        private async static Task<long?> InsertInvoiceLineOdooV12(OdooClient odooClient, long companyId, long? invoiceId, long accountIdInvoiceLine, long productId, long accountAnalyticId, long[] taxesId)
+        private async static Task<long?> InsertInvoiceLineOdooV12(OdooClient odooClient, long companyId, long? invoiceId, long accountIdInvoiceLine, long productId, long accountAnalyticId, long[] taxesId, double priceUnit, double quantity)
         {
             var modelLine = OdooDictionaryModel.Create(() => new AccountInvoiceLineOdooModel()
             {
                 InvoiceId = invoiceId,
                 Name = "TEST",
                 AccountId = accountIdInvoiceLine,
-                Quantity = 1,
-                PriceUnit = 100,
+                Quantity = quantity,
+                PriceUnit = priceUnit,
                 ProductId = productId,
                 AccountAnalyticId = accountAnalyticId,
                 CreateDate = DateTime.Now,
@@ -617,6 +619,27 @@ namespace OdooIntegration.ConsoleApp
             Console.WriteLine(JsonConvert.SerializeObject(result));
 
             return result.Id;
+        }
+
+        private async static Task<long?> InsertTaxLineOdooV12(OdooClient odooClient, long invoiceId, long taxId, decimal amount, long currencyId)
+        {
+            var name = "IVA Por Pagar " + (int)amount + "%";
+            var accountId = 1442;
+            var modelLine = OdooDictionaryModel.Create(() => new AccountInvoiceTaxOdooModel()
+            {
+                InvoiceId = invoiceId,
+                TaxId = taxId,
+                Amount = amount,
+                Name = name,
+                AccountId = accountId,
+                CurrencyId = currencyId
+            });
+
+            var result = await OdooHelper.AddModelAsync(modelLine, odooClient);
+            Console.WriteLine(JsonConvert.SerializeObject(result));
+
+            return result.Id;      
+            
         }
 
         private async static Task AddTaxesToInvoiceLineOdooV12(long invoiceLineId, long[] taxesId)
@@ -720,14 +743,17 @@ namespace OdooIntegration.ConsoleApp
                 var invoiceLine = await OdooHelper.GetAsync(repoInvoiceLine, line);
                 Console.WriteLine(JsonConvert.SerializeObject(invoiceLine));
 
-                await PrintAccountAsync(repoAccount, invoiceLine.AccountId);
-
-                Console.WriteLine("Invoice Line Taxes");
-                foreach(var tax in invoiceLine.InvoiceLineTaxIds)
+                if (invoiceLine != null)
                 {
-                    var invoiceLineTax = await OdooHelper.GetAsync(repoTaxes, tax);
-                    Console.WriteLine(JsonConvert.SerializeObject(invoiceLineTax));
-                }
+                    await PrintAccountAsync(repoAccount, invoiceLine.AccountId);
+
+                    Console.WriteLine("Invoice Line Taxes");
+                    foreach (var tax in invoiceLine.InvoiceLineTaxIds)
+                    {
+                        var invoiceLineTax = await OdooHelper.GetAsync(repoTaxes, tax);
+                        Console.WriteLine(JsonConvert.SerializeObject(invoiceLineTax));
+                    }
+                }                
             }
 
             Console.WriteLine("Invoice Taxes");            
