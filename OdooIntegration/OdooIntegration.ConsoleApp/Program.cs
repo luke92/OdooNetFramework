@@ -554,6 +554,7 @@ namespace OdooIntegration.ConsoleApp
             if (invoiceId.HasValue)
             {
                 var invoiceLineId = await InsertInvoiceLineOdooV12(odooClient, companyId, invoiceId, accountIdInvoiceLine, productId, accountAnalyticId, taxesId);
+                //await AddTaxesToInvoiceLineOdooV12(invoiceLineId.Value, taxesId);
                 await ValidateInvoiceOdooV12(invoiceId);
             }
         }
@@ -616,6 +617,36 @@ namespace OdooIntegration.ConsoleApp
             Console.WriteLine(JsonConvert.SerializeObject(result));
 
             return result.Id;
+        }
+
+        private async static Task AddTaxesToInvoiceLineOdooV12(long invoiceLineId, long[] taxesId)
+        {
+            var method = new OdooMethod(GetConfig(), "account.invoice.line");
+
+            var invoiceLineTaxId = new InvoiceLineTaxId
+            {
+                Integer = 6,
+                Bool = false,
+                IntegerArray = taxesId
+            };
+
+            var invoiceLineTaxIds = new InvoiceLineTaxId[] { invoiceLineTaxId };
+
+            var modelMany2Many = new InvoiceLineTaxIdsModelElement
+            {
+                IntegerArray = new long[] { invoiceLineId },
+                InvoiceLineTaxIdsModelClass = new InvoiceLineTaxIdsModel
+                {
+                    InvoiceLineTaxIds = new InvoiceLineTaxId[][] { invoiceLineTaxIds }
+                }
+            };
+
+            var json = JsonConvert.SerializeObject(modelMany2Many);
+
+            var jsonString = "[[60177],{\"invoice_line_tax_ids\":[[6,false,[3]]]}]";
+
+            var result = await method.CallAsync<long>("write", jsonString);
+            Console.WriteLine(JsonConvert.SerializeObject(result));
         }
 
         private async static Task ValidateInvoiceOdooV12(long? invoiceId)
