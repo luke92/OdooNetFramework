@@ -51,7 +51,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Helpers\InvoiceLineTaxIdsModel.cs" />
+    <Compile Include="Helpers\InvoiceUpdateMany2ManyModel.cs" />
     <Compile Include="Helpers\OdooHelper.cs" />
     <Compile Include="Helpers\OdooMethod.cs" />
     <Compile Include="Models\AccountAccountOdooModel.cs" />
