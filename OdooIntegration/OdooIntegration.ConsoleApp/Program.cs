@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OdooIntegration.ConsoleApp.Helpers;
+using OdooIntegration.ConsoleApp.Many2ManyHelpers;
 using OdooIntegration.ConsoleApp.Models;
 using PortaCapena.OdooJsonRpcClient;
 using PortaCapena.OdooJsonRpcClient.Converters;
@@ -558,7 +559,8 @@ namespace OdooIntegration.ConsoleApp
             {
                 var invoiceLineId = await InsertInvoiceLineOdooV12(odooClient, companyId, invoiceId, accountIdInvoiceLine, productId, accountAnalyticId, taxesId, priceUnit, quantity);
                 var taxLineId = await InsertTaxLineOdooV12(odooClient, invoiceId.Value, taxesId.FirstOrDefault(), (decimal)amountTax, currencyId);
-                //await ValidateInvoiceOdooV12(invoiceId);
+                await AddTaxesToInvoiceLineOdooV12(invoiceLineId.Value, taxesId);
+                await ValidateInvoiceOdooV12(invoiceId);
             }
         }
 
@@ -651,6 +653,12 @@ namespace OdooIntegration.ConsoleApp
 
             var result = await method.CallAsync<long>("action_invoice_open", invoiceId);
 
+            Console.WriteLine(JsonConvert.SerializeObject(result));
+        }
+
+        private async static Task AddTaxesToInvoiceLineOdooV12(long invoiceLineId, long[] taxesId)
+        {
+            var result = await OdooMany2ManyService.UpdateFieldMany2Many(GetConfig(), "account.invoice.line", new long[] { invoiceLineId }, "invoice_line_tax_ids", taxesId);
             Console.WriteLine(JsonConvert.SerializeObject(result));
         }
 
