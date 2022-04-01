@@ -29,12 +29,22 @@ namespace OdooIntegration.ConsoleApp.Many2ManyHelpers
             Method = "call";
             Params = new ParamsCallKw();
         }
+
+        public string GetJson(string argsReplacement)
+        {
+            var json = JsonConvert.SerializeObject(this);
+            if (!string.IsNullOrEmpty(argsReplacement))
+            {
+                json = json.Replace("\"" + this.Params.Args + "\"", argsReplacement);
+            }
+            return json;
+        }
     }
 
     public class ParamsCallKw
     {
         [JsonProperty("args")]
-        public string Args { get; set; }
+        public string Args { get; private set; }
 
         [JsonProperty("model")]
         public string Model { get; set; }

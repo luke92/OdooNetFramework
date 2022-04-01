@@ -38,16 +38,11 @@ namespace OdooIntegration.ConsoleApp.Many2ManyHelpers
 
         public async static Task<OdooResponseModel> CallKwAsync(OdooConfig odooConfig, OdooRequestCallKwModel model, string argsReplacement = null)
         {
+            var responseWrapper = new OdooResponseModel();
             var authentication = await AuthenticateAsync(odooConfig);
             if (authentication.HasSessionId)
-            {
-                var responseWrapper = new OdooResponseModel();
-                var json = JsonConvert.SerializeObject(model);
-                if (!string.IsNullOrEmpty(argsReplacement))
-                {
-                    json = json.Replace("\"" + model.Params.Args + "\"", argsReplacement);
-                }
-
+            {                
+                var json = model.GetJson(argsReplacement);
                 var response = await CallAsync(odooConfig.ApiUrl + _urlCallKw, json);
                 var responseString = await response.Content.ReadAsStringAsync();
                 
@@ -57,22 +52,26 @@ namespace OdooIntegration.ConsoleApp.Many2ManyHelpers
                 }
                 else
                 {
-                    responseWrapper = new OdooResponseModel
-                    {
-                        Error = new Error
-                        {
-                            Code = (long)response.StatusCode,
-                            Message = responseString,
-                        }
-                    };
+                    responseWrapper = GetError(response, responseString);
                 }
-                return responseWrapper;
             }
             else
             {
-                return authentication.ResponseError;
+                responseWrapper = authentication.ResponseError;
             }
-            
+            return responseWrapper;            
+        }
+
+        private static OdooResponseModel GetError(HttpResponseMessage response, string responseString)
+        {
+            return new OdooResponseModel
+            {
+                Error = new Error
+                {
+                    Code = (long)response.StatusCode,
+                    Message = responseString,
+                }
+            };
         }
 
         private static string GetArgs(long[] idsTable, string fieldMany2Many, long[] idsField)
