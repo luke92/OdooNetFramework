@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using PortaCapena.OdooJsonRpcClient.Models;
-using RestSharp;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -109,26 +108,6 @@ namespace OdooIntegration.ConsoleApp.Many2ManyHelpers
                 responseWrapper.ResponseError = JsonConvert.DeserializeObject<OdooResponseModel>(responseString);
             }
             return responseWrapper;
-        }
-
-        private static RestClient GetClient(OdooConfig odooConfig)
-        {
-            var uri = odooConfig.ApiUrl;
-            var client = new RestClient(uri);
-            return client;
-        }
-
-        private static RestRequest GetRequest(string urlMethod, RestSharp.Method method, string json, string sessionId = null)
-        {
-            var request = new RestRequest(urlMethod,method);
-            request.Timeout = -1;
-            request.AddHeader("Content-Type", "application/json");
-            request.AddParameter("application/json", json, ParameterType.RequestBody);
-            if (!string.IsNullOrWhiteSpace(sessionId))
-                sessionId = "";
-            request.AddHeader("Cookie", "session_id=" + sessionId);
-                      
-            return request;
         }
 
         private static async Task<HttpResponseMessage> CallAsync(string uri, string json)
