@@ -589,7 +589,7 @@ namespace OdooIntegration.ConsoleApp
                 NoContrato = date.ToString(),
                 Sucursal = SucursalDeAperturaAccountInvoiceOdooEnum.OficinaCentral,
                 SucursalEntrega = SucursalDeEntregaAccountInvoiceOdooEnum.OficinaCentral,
-                Fleet = fleetId,
+                //Fleet = fleetId,
                 CompanyId = companyId,
                 InvoiceLineIds = invoiceLineIds,
                 CreateDate = date,
