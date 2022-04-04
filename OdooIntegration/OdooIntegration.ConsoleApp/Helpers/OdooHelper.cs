@@ -267,6 +267,35 @@ namespace OdooIntegration.ConsoleApp.Helpers
             }
             return query;
         }
+
+        public async static Task<AccountTaxOdooModel> GetTaxAsync(OdooClient odooClient, long taxId)
+        {
+            var repoTaxes = new OdooRepository<AccountTaxOdooModel>(odooClient.Config);
+            var query = GetQueryId(repoTaxes, taxId);
+            var result = await query.FirstOrDefaultAsync();
+            return result.Value;
+        }
+        public async static Task<AccountInvoiceOdooModel> GetInvoiceOdooV12Async(OdooClient odooClient, long id)
+        {
+            var repository = new OdooRepository<AccountInvoiceOdooModel>(odooClient.Config);
+            var query = GetQueryId(repository, id);
+            var result = await query.FirstOrDefaultAsync();
+            return result.Value;
+        }
+
+        private static OdooQueryBuilder<T> GetQueryId<T>(OdooRepository<T> repository, long id) where T : IOdooModel, new()
+        {
+            var query = repository.Query();
+            query = query.Where(x => x.Id, PortaCapena.OdooJsonRpcClient.Consts.OdooOperator.EqualsTo, id);
+            return query;
+        }
+
+    }
+
+    public class GenericOdooModel
+    {
+        public long Id { get; set; }
+        public string Name { get; set; }
     }
 
     public class StatusResponse

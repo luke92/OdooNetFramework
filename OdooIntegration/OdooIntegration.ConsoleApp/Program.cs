@@ -445,7 +445,7 @@ namespace OdooIntegration.ConsoleApp
                 var versionServer = await GetVersionServer(odooClient);
                 if (versionServer > 12)
                 {
-                    await InsertInvoiceOdooV14(odooClient, partnerId, journalId, accountIdInvoice, currencyId, product.Id, product.TaxesId, accountPaymentTermId);
+                    await InsertInvoiceOdooV14(odooClient, partnerId, journalId, accountIdInvoice, currencyId, product.Id, product.TaxesId, product.Name, accountPaymentTermId);
                 }
                 else
                 {
@@ -466,7 +466,7 @@ namespace OdooIntegration.ConsoleApp
 
                     var vendorId = await OdooHelper.GetVendorFirstId(repoCustomer, _companyId);
 
-                    await InsertInvoiceOdooV12(odooClient, _companyId, partnerId, journalId, accountAnalyticId, accountIdInvoice, accountIdInvoiceLine, currencyId, product.Id, product.TaxesId, mediumId, sourceId, accountPaymentTermId, vendorId, teamCrmId, fleetId);
+                    await InsertInvoiceOdooV12(odooClient, _companyId, partnerId, journalId, accountAnalyticId, accountIdInvoice, accountIdInvoiceLine, currencyId, product.Id, product.TaxesId, product.Name, mediumId, sourceId, accountPaymentTermId, vendorId, teamCrmId, fleetId);
                 }
             }
             catch (Exception ex)
@@ -490,7 +490,7 @@ namespace OdooIntegration.ConsoleApp
             return versionServer;
         }
 
-        private async static Task InsertInvoiceOdooV14(OdooClient odooClient, long partnerId, long journalId, long accountId, long currencyId, long productId, long[] taxesId, long accountPaymentTermId)
+        private async static Task InsertInvoiceOdooV14(OdooClient odooClient, long partnerId, long journalId, long accountId, long currencyId, long productId, long[] taxesId, string productName, long accountPaymentTermId)
         {
             var model = OdooDictionaryModel.Create(() => new AccountMoveOdooModel()
             {
@@ -516,6 +516,7 @@ namespace OdooIntegration.ConsoleApp
                 var modelLine = OdooDictionaryModel.Create(() => new AccountMoveLineOdooModel()
                 {
                     AccountInternalGroup = InternalGroupAccountMoveLineOdooEnum.Income,
+                    Name = productName,
                     MoveId = result.Id.Value,
                     Date = DateTime.Now,
                     ParentState = StatusAccountMoveLineOdooEnum.Draft,
@@ -549,16 +550,16 @@ namespace OdooIntegration.ConsoleApp
             }
         }
 
-        private async static Task InsertInvoiceOdooV12(OdooClient odooClient, long companyId, long partnerId, long journalId, long accountAnalyticId, long accountIdInvoice, long accountIdInvoiceLine, long currencyId, long productId, long[] taxesId, long mediumId, long sourceId, long accountPaymentTermId, long vendorId, long teamCrmId, long fleetId)
+        private async static Task InsertInvoiceOdooV12(OdooClient odooClient, long companyId, long partnerId, long journalId, long accountAnalyticId, long accountIdInvoice, long accountIdInvoiceLine, long currencyId, long productId, long[] taxesId, string productName, long mediumId, long sourceId, long accountPaymentTermId, long vendorId, long teamCrmId, long fleetId)
         {
             var invoiceId = await InsertInvoiceHeaderOdooV12(odooClient, companyId, partnerId, journalId, accountIdInvoice, currencyId, mediumId, sourceId, accountPaymentTermId, vendorId, teamCrmId, fleetId, null);
             var priceUnit = 100d;
             var quantity = 1d;
-            var amountTax = priceUnit / 100 * 15;
+            var subTotal = priceUnit * quantity;
             if (invoiceId.HasValue)
             {
-                var invoiceLineId = await InsertInvoiceLineOdooV12(odooClient, companyId, invoiceId, accountIdInvoiceLine, productId, accountAnalyticId, taxesId, priceUnit, quantity);
-                var taxLineId = await InsertTaxLineOdooV12(odooClient, invoiceId.Value, taxesId.FirstOrDefault(), (decimal)amountTax, currencyId);
+                var invoiceLineId = await InsertInvoiceLineOdooV12(odooClient, companyId, invoiceId, accountIdInvoiceLine, productId, accountAnalyticId, taxesId, productName, priceUnit, quantity);
+                var taxLineId = await InsertTaxLineOdooV12(odooClient, invoiceId.Value, taxesId, (decimal)subTotal, currencyId);
                 await AddTaxesToInvoiceLineOdooV12(invoiceLineId.Value, taxesId);
                 await ValidateInvoiceOdooV12(invoiceId);
             }
@@ -570,10 +571,7 @@ namespace OdooIntegration.ConsoleApp
             var model = OdooDictionaryModel.Create(() => new AccountInvoiceOdooModel()
             {
                 PartnerId = partnerId,
-                DateInvoice = DateTime.Now,
-                CreateDate = DateTime.Now,
-                WriteDate = DateTime.Now,
-                LastUpdate = DateTime.Now,
+                DateInvoice = DateTime.Now,                
                 SaleCondition = CondicionVentaAccountInvoiceOdooEnum.Contado,
                 Type = TypeAccountInvoiceOdooEnum.CustomerInvoice,
                 State = StatusAccountInvoiceOdooEnum.Draft,
@@ -591,7 +589,10 @@ namespace OdooIntegration.ConsoleApp
                 SucursalEntrega = SucursalDeEntregaAccountInvoiceOdooEnum.OficinaCentral,
                 Fleet = fleetId,
                 CompanyId = companyId,
-                InvoiceLineIds = invoiceLineIds
+                InvoiceLineIds = invoiceLineIds,
+                CreateDate = DateTime.Now,
+                WriteDate = DateTime.Now,
+                LastUpdate = DateTime.Now,
             });
 
             var result = await OdooHelper.AddModelAsync(model, odooClient);
@@ -600,12 +601,12 @@ namespace OdooIntegration.ConsoleApp
             return result.Id;
         }
 
-        private async static Task<long?> InsertInvoiceLineOdooV12(OdooClient odooClient, long companyId, long? invoiceId, long accountIdInvoiceLine, long productId, long accountAnalyticId, long[] taxesId, double priceUnit, double quantity)
+        private async static Task<long?> InsertInvoiceLineOdooV12(OdooClient odooClient, long companyId, long? invoiceId, long accountIdInvoiceLine, long productId, long accountAnalyticId, long[] taxesId, string productName, double priceUnit, double quantity)
         {
             var modelLine = OdooDictionaryModel.Create(() => new AccountInvoiceLineOdooModel()
             {
                 InvoiceId = invoiceId,
-                Name = "TEST",
+                Name = productName,
                 AccountId = accountIdInvoiceLine,
                 Quantity = quantity,
                 PriceUnit = priceUnit,
@@ -624,25 +625,34 @@ namespace OdooIntegration.ConsoleApp
             return result.Id;
         }
 
-        private async static Task<long?> InsertTaxLineOdooV12(OdooClient odooClient, long invoiceId, long taxId, decimal amount, long currencyId)
+        private async static Task<long?> InsertTaxLineOdooV12(OdooClient odooClient, long invoiceId, long[] taxesId, decimal subTotalAmount, long currencyId)
         {
-            var name = "IVA Por Pagar " + (int)amount + "%";
-            var accountId = 1442;
-            var modelLine = OdooDictionaryModel.Create(() => new AccountInvoiceTaxOdooModel()
+            if (taxesId.Length > 0)
             {
-                InvoiceId = invoiceId,
-                TaxId = taxId,
-                Amount = amount,
-                Name = name,
-                AccountId = accountId,
-                CurrencyId = currencyId
-            });
+                var taxId = taxesId.FirstOrDefault();
+                var taxModel = await OdooHelper.GetTaxAsync(odooClient, taxId);
+                var name = taxModel.Name;
+                var accountId = taxModel.AccountId.Value;
+                var amount = subTotalAmount / 100 * (decimal)taxModel.Amount;
+                var modelLine = OdooDictionaryModel.Create(() => new AccountInvoiceTaxOdooModel()
+                {
+                    InvoiceId = invoiceId,
+                    TaxId = taxId,
+                    Amount = amount,
+                    Name = name,
+                    AccountId = accountId,
+                    CurrencyId = currencyId
+                });
 
-            var result = await OdooHelper.AddModelAsync(modelLine, odooClient);
-            Console.WriteLine(JsonConvert.SerializeObject(result));
+                var result = await OdooHelper.AddModelAsync(modelLine, odooClient);
+                Console.WriteLine(JsonConvert.SerializeObject(result));
 
-            return result.Id;      
-            
+                return result.Id;
+            }
+            else
+            {
+                return null;
+            }            
         }
 
         private async static Task ValidateInvoiceOdooV12(long? invoiceId)
@@ -654,6 +664,10 @@ namespace OdooIntegration.ConsoleApp
             var result = await method.CallAsync<long>("action_invoice_open", invoiceId);
 
             Console.WriteLine(JsonConvert.SerializeObject(result));
+
+            var invoice = await OdooHelper.GetInvoiceOdooV12Async(GetClient(), invoiceId.Value);
+            Console.WriteLine(invoice.Name);
+
         }
 
         private async static Task AddTaxesToInvoiceLineOdooV12(long invoiceLineId, long[] taxesId)
