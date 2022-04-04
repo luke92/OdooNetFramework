@@ -568,31 +568,33 @@ namespace OdooIntegration.ConsoleApp
         private async static Task<long?> InsertInvoiceHeaderOdooV12(OdooClient odooClient, long companyId, long partnerId, long journalId, long accountIdInvoice, long currencyId, long mediumId, long sourceId, long accountPaymentTermId, long vendorId, long teamCrmId, long fleetId, long? invoiceLineId)
         {
             var invoiceLineIds = invoiceLineId.HasValue ? new long[] { invoiceLineId.Value } : new long[] {};
+            var date = DateTime.Now;
+            var dateDue = date.AddDays(30);
             var model = OdooDictionaryModel.Create(() => new AccountInvoiceOdooModel()
             {
                 PartnerId = partnerId,
-                DateInvoice = DateTime.Now,                
-                SaleCondition = CondicionVentaAccountInvoiceOdooEnum.Contado,
+                DateInvoice = date,
+                DateDue = dateDue,
+                //SaleCondition = CondicionVentaAccountInvoiceOdooEnum.Contado,
                 Type = TypeAccountInvoiceOdooEnum.CustomerInvoice,
                 State = StatusAccountInvoiceOdooEnum.Draft,
                 CurrencyId = currencyId,
                 JournalId = journalId,
                 AccountId = accountIdInvoice,
-                MediumId = mediumId,
-                SourceId = sourceId,
-                DateDue = DateTime.Now.AddDays(30),
-                PaymentTermId = accountPaymentTermId,
-                Vend = vendorId,
-                TeamId = teamCrmId,
-                NoContrato = DateTime.Now.ToString(),
+                //MediumId = mediumId,
+                //SourceId = sourceId,                
+                //PaymentTermId = accountPaymentTermId,
+                //Vend = vendorId,
+                //TeamId = teamCrmId,
+                NoContrato = date.ToString(),
                 Sucursal = SucursalDeAperturaAccountInvoiceOdooEnum.OficinaCentral,
                 SucursalEntrega = SucursalDeEntregaAccountInvoiceOdooEnum.OficinaCentral,
                 Fleet = fleetId,
                 CompanyId = companyId,
                 InvoiceLineIds = invoiceLineIds,
-                CreateDate = DateTime.Now,
-                WriteDate = DateTime.Now,
-                LastUpdate = DateTime.Now,
+                CreateDate = date,
+                WriteDate = date,
+                LastUpdate = date,
             });
 
             var result = await OdooHelper.AddModelAsync(model, odooClient);
@@ -666,7 +668,7 @@ namespace OdooIntegration.ConsoleApp
             Console.WriteLine(JsonConvert.SerializeObject(result));
 
             var invoice = await OdooHelper.GetInvoiceOdooV12Async(GetClient(), invoiceId.Value);
-            Console.WriteLine(invoice.Name);
+            Console.WriteLine(invoice.DisplayName);
 
         }
 
