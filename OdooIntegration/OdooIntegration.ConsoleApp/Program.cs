@@ -96,6 +96,8 @@ namespace OdooIntegration.ConsoleApp
 
             await PrintIdentificationTypes(odooClient);
 
+            await PrintPaymentTerms(odooClient);
+
             await PrintAccountAnalyticGroups(odooClient);
 
             await PrintVehicleBrands(odooClient);
@@ -191,6 +193,34 @@ namespace OdooIntegration.ConsoleApp
                 Console.WriteLine(ex);
             }
             
+            Console.WriteLine("");
+        }
+
+        public async static Task PrintPaymentTerms(OdooClient odooClient)
+        {
+            Console.WriteLine("Payment Terms");
+            try
+            {
+                var repository = new OdooRepository<AccountPaymentTermOdooModel>(odooClient.Config);
+                var repositoryLines = new OdooRepository<AccountPaymentTermLineOdooModel>(odooClient.Config);
+                var results = await repository.Query().ToListAsync();
+                foreach (var result in results.Value)
+                {
+                    var json = JsonConvert.SerializeObject(result);
+                    Console.WriteLine(json);
+                    foreach(var line in result.LineIds)
+                    {
+                        var resultLine = await OdooHelper.GetAsync(repositoryLines, line);
+                        var jsonLine = JsonConvert.SerializeObject(resultLine);
+                        Console.WriteLine(jsonLine);
+                    }                    
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+
             Console.WriteLine("");
         }
 
@@ -575,7 +605,7 @@ namespace OdooIntegration.ConsoleApp
                 PartnerId = partnerId,
                 DateInvoice = date,
                 DateDue = dateDue,
-                //SaleCondition = CondicionVentaAccountInvoiceOdooEnum.Contado,
+                SaleCondition = CondicionVentaAccountInvoiceOdooEnum.Contado,
                 Type = TypeAccountInvoiceOdooEnum.CustomerInvoice,
                 State = StatusAccountInvoiceOdooEnum.Draft,
                 CurrencyId = currencyId,
@@ -583,7 +613,7 @@ namespace OdooIntegration.ConsoleApp
                 AccountId = accountIdInvoice,
                 //MediumId = mediumId,
                 //SourceId = sourceId,                
-                //PaymentTermId = accountPaymentTermId,
+                PaymentTermId = accountPaymentTermId,
                 //Vend = vendorId,
                 //TeamId = teamCrmId,
                 NoContrato = date.ToString(),
