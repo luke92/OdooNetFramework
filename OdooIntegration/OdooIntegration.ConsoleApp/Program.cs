@@ -40,6 +40,9 @@ namespace OdooIntegration.ConsoleApp
 
                 switch(option)
                 {
+                    case "5":
+                        await AddPaymentAsync(odooClient);
+                        break;
                     case "4":
                         await PrintTaxData(odooClient);
                         break;
@@ -69,26 +72,35 @@ namespace OdooIntegration.ConsoleApp
             Console.WriteLine("2) Insert Invoice Line Test");
             Console.WriteLine("3) Print Invoice by Id");
             Console.WriteLine("4) Print Tax by Id");
+            Console.WriteLine("5) Add Payment");
             var key = Console.ReadLine();
             Console.WriteLine("");
             return key;
         }
 
-        private async static Task PrintTaxData(OdooClient odooClient)
+        private static long Prompt(string field)
         {
             var idString = "";
-            var taxId = 0l;
+            var id = 0l;
             do
             {
-                Console.WriteLine("Enter Tax ID");
+                Console.WriteLine("Enter " + field);
                 idString = Console.ReadLine();
-            } while (!long.TryParse(idString, out taxId));
+            } while (!long.TryParse(idString, out id));
 
-            Console.WriteLine("Tax ID: " + taxId);
+            Console.WriteLine(field + ": " + id);
+            return id;
+        }
+
+        private async static Task PrintTaxData(OdooClient odooClient)
+        {
+            var taxId = Prompt("Tax ID");
             var repository = new OdooRepository<AccountTaxOdooModel>(odooClient.Config);
             var tax = await OdooHelper.GetAsync(repository, taxId);
             Console.WriteLine(JsonConvert.SerializeObject(tax));
         }
+
+        
 
         public async static Task PrintRecordsModelsAsync(OdooClient odooClient)
         {
@@ -507,6 +519,16 @@ namespace OdooIntegration.ConsoleApp
             Console.WriteLine("");
         }
 
+        public async static Task AddPaymentAsync(OdooClient odooClient)
+        {
+            var invoiceId = (long?)null;
+            var id = Prompt("Invoice ID");
+            if (id > 0)
+            {
+                invoiceId = id;
+            }
+        }
+
         private async static Task<string> GetVersion(OdooClient odooClient)
         {
             var versionResult = await odooClient.GetVersionAsync();
@@ -710,15 +732,7 @@ namespace OdooIntegration.ConsoleApp
 
         private async static Task PrintInvoiceData(OdooClient odooClient)
         {
-            var invoiceIdString = "";
-            var invoiceId = 0l;
-            do
-            {
-                Console.WriteLine("Enter Invoice ID");
-                invoiceIdString = Console.ReadLine();
-            } while (!long.TryParse(invoiceIdString, out invoiceId));
-
-            Console.WriteLine("Invoice ID: " + invoiceId);
+            var invoiceId = Prompt("Invoice ID");
 
             var versionServer = await GetVersionServer(odooClient);
             if (versionServer > 12)

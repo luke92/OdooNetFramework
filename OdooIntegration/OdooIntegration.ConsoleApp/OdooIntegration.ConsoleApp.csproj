@@ -82,6 +82,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Helpers\ConverterHelper.cs" />
     <Compile Include="Helpers\OdooHelper.cs" />
     <Compile Include="Helpers\OdooMethod.cs" />
     <Compile Include="Many2ManyHelpers\OdooAuthenticateRequestModel.cs" />
