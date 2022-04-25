@@ -283,6 +283,14 @@ namespace OdooIntegration.ConsoleApp.Helpers
             return result.Value;
         }
 
+        public async static Task<AccountPaymentOdooModel> GetPaymentAsync(OdooClient odooClient, long id)
+        {
+            var repository = new OdooRepository<AccountPaymentOdooModel>(odooClient.Config);
+            var query = GetQueryId(repository, id);
+            var result = await query.FirstOrDefaultAsync();
+            return result.Value;
+        }
+
         private static OdooQueryBuilder<T> GetQueryId<T>(OdooRepository<T> repository, long id) where T : IOdooModel, new()
         {
             var query = repository.Query();

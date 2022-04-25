@@ -100,6 +100,7 @@
     <Compile Include="Models\AccountJournalOdooModel.cs" />
     <Compile Include="Models\AccountMoveLineOdooModel.cs" />
     <Compile Include="Models\AccountMoveOdooModel.cs" />
+    <Compile Include="Models\AccountPaymentMethodOdooModel.cs" />
     <Compile Include="Models\AccountPaymentOdooModel.cs" />
     <Compile Include="Models\AccountPaymentTermLineOdooModel.cs" />
     <Compile Include="Models\AccountPaymentTermOdooModel.cs" />

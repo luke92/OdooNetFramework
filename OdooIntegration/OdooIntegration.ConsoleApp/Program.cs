@@ -92,6 +92,60 @@ namespace OdooIntegration.ConsoleApp
             return id;
         }
 
+        private static long? PromptOrDefault(string field)
+        {
+            var idString = "";
+            var id = 0l;
+            do
+            {
+                Console.WriteLine("Enter " + field);
+                idString = Console.ReadLine();
+            } while (!long.TryParse(idString, out id));
+
+            Console.WriteLine(field + ": " + id);
+            
+            if (id == 0)
+            {
+                return null;
+            }
+            return id;
+        }
+
+        private static string PromptString(string field)
+        {
+            Console.WriteLine("Enter " + field);
+            var data = Console.ReadLine();
+            Console.WriteLine(field + ": " + data);
+            return data;
+        }
+
+        private static decimal? PromptMoneyOrDefault(string field)
+        {
+            var input = "";
+            var value = 0m;
+            do
+            {
+                Console.WriteLine("Enter " + field);
+                input = Console.ReadLine();
+            } while (!decimal.TryParse(input, out value));
+
+            Console.WriteLine(field + ": " + value);
+
+            if (value == 0)
+            {
+                return null;
+            }
+            return value;
+        }
+
+        private static bool PrompBoolean(string booleanQuestion)
+        {
+            Console.WriteLine(booleanQuestion);
+            Console.WriteLine("Enter Y or N (N is Default)");
+            var data = Console.ReadKey();
+            return data.Key == ConsoleKey.Y;
+        }
+
         private async static Task PrintTaxData(OdooClient odooClient)
         {
             var taxId = Prompt("Tax ID");
@@ -521,12 +575,54 @@ namespace OdooIntegration.ConsoleApp
 
         public async static Task AddPaymentAsync(OdooClient odooClient)
         {
-            var invoiceId = (long?)null;
-            var id = Prompt("Invoice ID");
-            if (id > 0)
+            var paymentId = await AddPaymentDraftAsync(odooClient);
+            await ConfirmPayment(paymentId);
+
+        }
+
+        private async static Task<long?> AddPaymentDraftAsync(OdooClient odooClient)
+        {
+            var invoiceId = PromptOrDefault("Invoice Id");
+            var invoice = (AccountInvoiceOdooModel)null;
+            var circular = "";
+            if (invoiceId.HasValue)
             {
-                invoiceId = id;
+                var repositoryInvoice = new OdooRepository<AccountInvoiceOdooModel>(odooClient.Config);
+                invoice = await OdooHelper.GetAsync<AccountInvoiceOdooModel>(repositoryInvoice, invoiceId.Value);
+                circular = invoice.Name;
             }
+
+            var partnerId = PromptOrDefault("Partner Id");
+            var currencyId = PromptOrDefault("CurrencyId Id");
+            var journalId = Prompt("Journal Id");
+            var paymentMethodId = PromptOrDefault("Payment Method Id");
+            var amount = PromptMoneyOrDefault("Amount");
+            var isFullyPaid = PrompBoolean("Mark Invoice as Fully Paid?");
+            var paymentDifferenceHandling = isFullyPaid ? PaymentDifferenceHandlingAccountPaymentOdooEnum.MarkInvoiceAsFullyPaid : PaymentDifferenceHandlingAccountPaymentOdooEnum.KeepOpen;
+
+            var invoiceIds = invoiceId.HasValue ? new long[] { invoiceId.Value } : new long[] { };
+            var date = DateTime.Now;
+            var model = OdooDictionaryModel.Create(() => new AccountPaymentOdooModel()
+            {
+                InvoiceIds = invoiceIds,
+                PartnerId = partnerId,
+                CurrencyId = currencyId,
+                JournalId = journalId,
+                PaymentMethodId = paymentMethodId,
+                PaymentDifferenceHandling = paymentDifferenceHandling,
+                PaymentType = PaymentTypeAccountPaymentOdooEnum.ReceiveMoney,
+                Communication = circular,
+                Amount = amount,
+                PaymentDate = date,
+                CreateDate = date,
+                WriteDate = date,
+                LastUpdate = date,
+            });
+
+            var result = await OdooHelper.AddModelAsync(model, odooClient);
+            Console.WriteLine(JsonConvert.SerializeObject(result));
+
+            return result.Id;
         }
 
         private async static Task<string> GetVersion(OdooClient odooClient)
@@ -721,6 +817,21 @@ namespace OdooIntegration.ConsoleApp
 
             var invoice = await OdooHelper.GetInvoiceOdooV12Async(GetClient(), invoiceId.Value);
             Console.WriteLine(invoice.DisplayName);
+
+        }
+
+        private async static Task ConfirmPayment(long? paymentId)
+        {
+            if (!paymentId.HasValue) return;
+
+            var method = new OdooMethod(GetConfig(), "account.payment");
+
+            var result = await method.CallAsync<long>("post", paymentId);
+
+            Console.WriteLine(JsonConvert.SerializeObject(result));
+
+            var payment = await OdooHelper.GetInvoiceOdooV12Async(GetClient(), paymentId.Value);
+            Console.WriteLine(payment.DisplayName);
 
         }
 
