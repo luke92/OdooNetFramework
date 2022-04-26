@@ -575,12 +575,19 @@ namespace OdooIntegration.ConsoleApp
 
         public async static Task AddPaymentAsync(OdooClient odooClient)
         {
-            var paymentId = await AddPaymentDraftAsync(odooClient);
-            await ConfirmPayment(paymentId);
+            var paymentAndInvoices = await AddPaymentDraftAsync(odooClient);
+            
+            if (paymentAndInvoices.Item1.HasValue && paymentAndInvoices.Item2.Count() > 0)
+            {
+                await AddInvoicesToPayment(paymentAndInvoices.Item1.Value, paymentAndInvoices.Item2);
+            }
 
+            await ConfirmPaymentAsync(paymentAndInvoices.Item1);
+
+            //await ValidateInvoicePaymentAsync(paymentId);
         }
 
-        private async static Task<long?> AddPaymentDraftAsync(OdooClient odooClient)
+        private async static Task<Tuple<long?, long[]>> AddPaymentDraftAsync(OdooClient odooClient)
         {
             var invoiceId = PromptOrDefault("Invoice Id");
             var invoice = (AccountInvoiceOdooModel)null;
@@ -630,11 +637,11 @@ namespace OdooIntegration.ConsoleApp
 
             var result = await OdooHelper.AddModelAsync(model, odooClient);
             Console.WriteLine(JsonConvert.SerializeObject(result));
-
-            return result.Id;
+            
+            return new Tuple<long?, long []>(result.Id, invoiceIds);
         }
 
-        private async static Task ConfirmPayment(long? paymentId)
+        private async static Task ConfirmPaymentAsync(long? paymentId)
         {
             if (!paymentId.HasValue) return;
 
@@ -644,23 +651,29 @@ namespace OdooIntegration.ConsoleApp
 
             Console.WriteLine(JsonConvert.SerializeObject(result));
 
-            var payment = await OdooHelper.GetInvoiceOdooV12Async(GetClient(), paymentId.Value);
+            var payment = await OdooHelper.GetPaymentAsync(GetClient(), paymentId.Value);
             Console.WriteLine(payment.DisplayName);
 
         }
 
-        private async static Task AssignPaymentWithInvoice(long? paymentId, long? invoiceId)
+        private async static Task ValidateInvoicePaymentAsync(long? paymentId)
         {
-            if (!paymentId.HasValue || !invoiceId.HasValue) return;
+            if (!paymentId.HasValue) return;
 
-            var method = new OdooMethod(GetConfig(), "account.invoice");
+            var method = new OdooMethod(GetConfig(), "account.payment");
 
-            var result = await method.CallAsync<long>("assign_outstanding_credit", paymentId, );
+            var result = await method.CallAsync<long>("action_validate_invoice_payment", paymentId);
 
             Console.WriteLine(JsonConvert.SerializeObject(result));
 
             var payment = await OdooHelper.GetInvoiceOdooV12Async(GetClient(), paymentId.Value);
             Console.WriteLine(payment.DisplayName);
+        }
+
+        private async static Task AddInvoicesToPayment(long paymentId, long[] invoiceIds)
+        {
+            var result = await OdooMany2ManyService.UpdateFieldMany2Many(GetConfig(), "account.payment", new long[] { paymentId }, "invoice_ids", invoiceIds);
+            Console.WriteLine(JsonConvert.SerializeObject(result));
         }
 
         private async static Task<string> GetVersion(OdooClient odooClient)
