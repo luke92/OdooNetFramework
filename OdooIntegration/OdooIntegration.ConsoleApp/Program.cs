@@ -585,15 +585,23 @@ namespace OdooIntegration.ConsoleApp
             var invoiceId = PromptOrDefault("Invoice Id");
             var invoice = (AccountInvoiceOdooModel)null;
             var circular = "";
+            var partnerId = (long?)null;
+            var currencyId = (long?)null;
+
             if (invoiceId.HasValue)
             {
                 var repositoryInvoice = new OdooRepository<AccountInvoiceOdooModel>(odooClient.Config);
-                invoice = await OdooHelper.GetAsync<AccountInvoiceOdooModel>(repositoryInvoice, invoiceId.Value);
+                invoice = await OdooHelper.GetAsync(repositoryInvoice, invoiceId.Value);
                 circular = invoice.Name;
+                partnerId = invoice.PartnerId;
+                currencyId = invoice.CurrencyId;
+            }
+            else
+            {
+                partnerId = PromptOrDefault("Partner Id");
+                currencyId = PromptOrDefault("CurrencyId Id");
             }
 
-            var partnerId = PromptOrDefault("Partner Id");
-            var currencyId = PromptOrDefault("CurrencyId Id");
             var journalId = Prompt("Journal Id");
             var paymentMethodId = PromptOrDefault("Payment Method Id");
             var amount = PromptMoneyOrDefault("Amount");
@@ -603,7 +611,7 @@ namespace OdooIntegration.ConsoleApp
             var invoiceIds = invoiceId.HasValue ? new long[] { invoiceId.Value } : new long[] { };
             var date = DateTime.Now;
             var model = OdooDictionaryModel.Create(() => new AccountPaymentOdooModel()
-            {
+            {   
                 InvoiceIds = invoiceIds,
                 PartnerId = partnerId,
                 CurrencyId = currencyId,
@@ -613,6 +621,7 @@ namespace OdooIntegration.ConsoleApp
                 PaymentType = PaymentTypeAccountPaymentOdooEnum.ReceiveMoney,
                 Communication = circular,
                 Amount = amount,
+                PartnerType = PartnerTypeAccountPaymentOdooEnum.Customer,
                 PaymentDate = date,
                 CreateDate = date,
                 WriteDate = date,
@@ -623,6 +632,35 @@ namespace OdooIntegration.ConsoleApp
             Console.WriteLine(JsonConvert.SerializeObject(result));
 
             return result.Id;
+        }
+
+        private async static Task ConfirmPayment(long? paymentId)
+        {
+            if (!paymentId.HasValue) return;
+
+            var method = new OdooMethod(GetConfig(), "account.payment");
+
+            var result = await method.CallAsync<long>("post", paymentId);
+
+            Console.WriteLine(JsonConvert.SerializeObject(result));
+
+            var payment = await OdooHelper.GetInvoiceOdooV12Async(GetClient(), paymentId.Value);
+            Console.WriteLine(payment.DisplayName);
+
+        }
+
+        private async static Task AssignPaymentWithInvoice(long? paymentId, long? invoiceId)
+        {
+            if (!paymentId.HasValue || !invoiceId.HasValue) return;
+
+            var method = new OdooMethod(GetConfig(), "account.invoice");
+
+            var result = await method.CallAsync<long>("assign_outstanding_credit", paymentId, );
+
+            Console.WriteLine(JsonConvert.SerializeObject(result));
+
+            var payment = await OdooHelper.GetInvoiceOdooV12Async(GetClient(), paymentId.Value);
+            Console.WriteLine(payment.DisplayName);
         }
 
         private async static Task<string> GetVersion(OdooClient odooClient)
@@ -817,21 +855,6 @@ namespace OdooIntegration.ConsoleApp
 
             var invoice = await OdooHelper.GetInvoiceOdooV12Async(GetClient(), invoiceId.Value);
             Console.WriteLine(invoice.DisplayName);
-
-        }
-
-        private async static Task ConfirmPayment(long? paymentId)
-        {
-            if (!paymentId.HasValue) return;
-
-            var method = new OdooMethod(GetConfig(), "account.payment");
-
-            var result = await method.CallAsync<long>("post", paymentId);
-
-            Console.WriteLine(JsonConvert.SerializeObject(result));
-
-            var payment = await OdooHelper.GetInvoiceOdooV12Async(GetClient(), paymentId.Value);
-            Console.WriteLine(payment.DisplayName);
 
         }
 
