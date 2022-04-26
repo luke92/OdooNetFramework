@@ -583,8 +583,6 @@ namespace OdooIntegration.ConsoleApp
             }
 
             await ConfirmPaymentAsync(paymentAndInvoices.Item1);
-
-            //await ValidateInvoicePaymentAsync(paymentId);
         }
 
         private async static Task<Tuple<long?, long[]>> AddPaymentDraftAsync(OdooClient odooClient)
