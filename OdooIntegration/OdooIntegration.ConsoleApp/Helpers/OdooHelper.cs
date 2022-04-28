@@ -291,6 +291,18 @@ namespace OdooIntegration.ConsoleApp.Helpers
             return result.Value;
         }
 
+        public async static Task<AccountPaymentOdooModel[]> GetPaymentsWithoutInvoiceAsync(OdooClient odooClient, long? companyId = null)
+        {
+            var repository = new OdooRepository<AccountPaymentOdooModel>(odooClient.Config);
+            var query = GetQuery(repository,companyId);
+            var filter = OdooFilter.Create()
+                .EqualTo("has_invoices", false);
+            query = query.Where(filter);
+            query = query.Where( x=> x.State, PortaCapena.OdooJsonRpcClient.Consts.OdooOperator.EqualsTo, StatusAccountPaymentOdooEnum.Posted);
+            var result = await query.ToListAsync();
+            return result.Value;
+        }
+
         private static OdooQueryBuilder<T> GetQueryId<T>(OdooRepository<T> repository, long id) where T : IOdooModel, new()
         {
             var query = repository.Query();

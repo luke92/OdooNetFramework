@@ -40,6 +40,15 @@ namespace OdooIntegration.ConsoleApp
 
                 switch(option)
                 {
+                    case "8":
+                        await PrintPaynentDataAsync(odooClient);
+                        break;
+                    case "7":
+                        await ListPaymentsWithoutInvoiceAsync(odooClient);
+                        break;
+                    case "6": 
+                        await AssignPaymentToInvoiceAsync(odooClient);
+                        break;
                     case "5":
                         await AddPaymentAsync(odooClient);
                         break;
@@ -73,6 +82,9 @@ namespace OdooIntegration.ConsoleApp
             Console.WriteLine("3) Print Invoice by Id");
             Console.WriteLine("4) Print Tax by Id");
             Console.WriteLine("5) Add Payment");
+            Console.WriteLine("6) Assign payment previously created to Invoice");
+            Console.WriteLine("7) Print Payments without Invoice");
+            Console.WriteLine("8) Print Payment by Id");
             var key = Console.ReadLine();
             Console.WriteLine("");
             return key;
@@ -571,6 +583,45 @@ namespace OdooIntegration.ConsoleApp
             }
 
             Console.WriteLine("");
+        }
+
+        private async static Task PrintPaynentDataAsync(OdooClient odooClient)
+        {
+            var paymentId = Prompt("Payment ID");
+            var payment = await OdooHelper.GetPaymentAsync(odooClient, paymentId);
+            Console.WriteLine(JsonConvert.SerializeObject(payment));
+        }
+
+        public async static Task ListPaymentsWithoutInvoiceAsync(OdooClient odooClient)
+        {
+            //PrintPaymentDataAsync
+            var payments = await OdooHelper.GetPaymentsWithoutInvoiceAsync(odooClient);
+            foreach (var payment in payments)
+            {
+                Console.WriteLine("Payment Id: " + payment.Id + " | Name: " + payment.DisplayName + " | Amount: " + payment.Amount);
+            }
+        }
+
+        public async static Task AssignPaymentToInvoiceAsync(OdooClient odooClient)
+        {
+            var invoiceId = Prompt("Invoice Id");
+            var invoice = await OdooHelper.GetInvoiceOdooV12Async(odooClient, invoiceId);
+            Console.WriteLine(invoice.DisplayName);
+            Console.WriteLine(invoice.AmountTotal);
+            Console.WriteLine(invoice.Residual);
+
+            var paymentId = Prompt("Payment Id");
+            var payment = await OdooHelper.GetPaymentAsync(odooClient, paymentId);
+            if (payment != null && payment.HasInvoices.HasValue)
+            {
+                await ConfirmPaymentAsync(paymentId);
+                payment = await OdooHelper.GetPaymentAsync(odooClient, paymentId);
+            }
+            Console.WriteLine(payment.DisplayName);
+            Console.WriteLine(payment.AmountTotal);
+            Console.WriteLine(payment.AmountResidual);
+
+            await AddInvoicesToPayment(paymentId, new long[] { invoiceId });
         }
 
         public async static Task AddPaymentAsync(OdooClient odooClient)
