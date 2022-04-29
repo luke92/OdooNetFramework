@@ -36,39 +36,42 @@ namespace OdooIntegration.ConsoleApp
             }
             else
             {
-                var option = SelectMenu();
-
-                switch(option)
+                var isOpen = true;
+                while (isOpen)
                 {
-                    case "8":
-                        await PrintPaynentDataAsync(odooClient);
-                        break;
-                    case "7":
-                        await ListPaymentsWithoutInvoiceAsync(odooClient);
-                        break;
-                    case "6": 
-                        await AssignPaymentToInvoiceAsync(odooClient);
-                        break;
-                    case "5":
-                        await AddPaymentAsync(odooClient);
-                        break;
-                    case "4":
-                        await PrintTaxData(odooClient);
-                        break;
-                    case "3":
-                        await PrintInvoiceData(odooClient);
-                        break;
-                    case "2":
-                        await InsertInvoiceLineAsync(odooClient);
-                        break;
-                    case "1":
-                        await PrintRecordsModelsAsync(odooClient);
-                        break;
-                    default:
-                        await PrintRecordsModelsAsync(odooClient);
-                        break;
+                    var option = SelectMenu();
+
+                    switch (option)
+                    {
+                        case "8":
+                            await PrintPaynentDataAsync(odooClient);
+                            break;
+                        case "7":
+                            await ListPaymentsWithoutInvoiceAsync(odooClient);
+                            break;
+                        case "6":
+                            await AssignPaymentToInvoiceAsync(odooClient);
+                            break;
+                        case "5":
+                            await AddPaymentAsync(odooClient);
+                            break;
+                        case "4":
+                            await PrintTaxData(odooClient);
+                            break;
+                        case "3":
+                            await PrintInvoiceData(odooClient);
+                            break;
+                        case "2":
+                            await InsertInvoiceLineAsync(odooClient);
+                            break;
+                        case "1":
+                            await PrintRecordsModelsAsync(odooClient);
+                            break;
+                        default:
+                            isOpen = false;
+                            break;
+                    }
                 }
-                
             }
             Console.WriteLine("Press any key to finish");
             Console.ReadKey();
@@ -598,7 +601,7 @@ namespace OdooIntegration.ConsoleApp
             var payments = await OdooHelper.GetPaymentsWithoutInvoiceAsync(odooClient);
             foreach (var payment in payments)
             {
-                Console.WriteLine("Payment Id: " + payment.Id + " | Name: " + payment.DisplayName + " | Amount: " + payment.Amount);
+                Console.WriteLine("Payment Id: " + payment.Id + " | Name: " + payment.DisplayName + " | Amount: " + payment.Amount +  " | " + payment.AmountPayable);
             }
         }
 
@@ -612,7 +615,7 @@ namespace OdooIntegration.ConsoleApp
 
             var paymentId = Prompt("Payment Id");
             var payment = await OdooHelper.GetPaymentAsync(odooClient, paymentId);
-            if (payment != null && payment.HasInvoices.HasValue)
+            if (payment != null && (!payment.HasInvoices.HasValue || !payment.HasInvoices.Value))
             {
                 await ConfirmPaymentAsync(paymentId);
                 payment = await OdooHelper.GetPaymentAsync(odooClient, paymentId);

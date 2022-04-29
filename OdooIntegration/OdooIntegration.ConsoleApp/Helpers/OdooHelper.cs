@@ -6,6 +6,7 @@ using PortaCapena.OdooJsonRpcClient.Models;
 using PortaCapena.OdooJsonRpcClient.Request;
 using PortaCapena.OdooJsonRpcClient.Result;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace OdooIntegration.ConsoleApp.Helpers
@@ -291,16 +292,36 @@ namespace OdooIntegration.ConsoleApp.Helpers
             return result.Value;
         }
 
-        public async static Task<AccountPaymentOdooModel[]> GetPaymentsWithoutInvoiceAsync(OdooClient odooClient, long? companyId = null)
+        public async static Task<List<PaymentModel>> GetPaymentsWithoutInvoiceAsync(OdooClient odooClient, long? companyId = null)
         {
             var repository = new OdooRepository<AccountPaymentOdooModel>(odooClient.Config);
-            var query = GetQuery(repository,companyId);
-            var filter = OdooFilter.Create()
-                .EqualTo("has_invoices", false);
-            query = query.Where(filter);
+            var query = GetQuery(repository,companyId);            
             query = query.Where( x=> x.State, PortaCapena.OdooJsonRpcClient.Consts.OdooOperator.EqualsTo, StatusAccountPaymentOdooEnum.Posted);
-            var result = await query.ToListAsync();
-            return result.Value;
+            query = query.Where(x => x.HasInvoices, PortaCapena.OdooJsonRpcClient.Consts.OdooOperator.EqualsTo, false);
+            query = query.Where(x => x.AmountPayable, PortaCapena.OdooJsonRpcClient.Consts.OdooOperator.GreaterThan, 0);
+            query = query.Where(x => x.MoveReconciled, PortaCapena.OdooJsonRpcClient.Consts.OdooOperator.EqualsTo, false);
+            var result = await query.Select(x => new PaymentModel
+            {
+                Id = x.Id,
+                Name = x.Name,
+                DisplayName = x.DisplayName,
+                Amount = x.Amount,
+                AmountPayable = x.AmountPayable
+            }).Take(10).ToListAsync();
+            var list = new List<PaymentModel>();
+            foreach( var paymentOdoo in result.Value)
+            {
+                var payment = new PaymentModel
+                {
+                    Id = paymentOdoo.Id,
+                    Name = paymentOdoo.Name,
+                    DisplayName = paymentOdoo.DisplayName,
+                    Amount = paymentOdoo.Amount,
+                    AmountPayable = paymentOdoo.AmountPayable
+                };
+                list.Add(payment);
+            }
+            return list;
         }
 
         private static OdooQueryBuilder<T> GetQueryId<T>(OdooRepository<T> repository, long id) where T : IOdooModel, new()
@@ -312,10 +333,18 @@ namespace OdooIntegration.ConsoleApp.Helpers
 
     }
 
+    public class PaymentModel : GenericOdooModel
+    {
+        public decimal? Amount { get; set; }
+        public decimal? AmountPayable { get; set; }
+
+    }
+
     public class GenericOdooModel
     {
         public long Id { get; set; }
         public string Name { get; set; }
+        public string DisplayName { get; set; }
     }
 
     public class StatusResponse
