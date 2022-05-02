@@ -177,6 +177,8 @@ namespace OdooIntegration.ConsoleApp
 
             await PrintIdentificationTypes(odooClient);
 
+            await PrintPaymentMethods(odooClient);
+
             await PrintPaymentTerms(odooClient);
 
             await PrintAccountAnalyticGroups(odooClient);
@@ -274,6 +276,23 @@ namespace OdooIntegration.ConsoleApp
                 Console.WriteLine(ex);
             }
             
+            Console.WriteLine("");
+        }
+
+        public async static Task PrintPaymentMethods(OdooClient odooClient)
+        {
+            Console.WriteLine("Payment methods");
+            try
+            {
+                var repository = new OdooRepository<AccountPaymentMethodOdooModel>(odooClient.Config);
+                var json = await OdooHelper.GetJsonRepositoryResults(repository);
+                Console.WriteLine(json);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+
             Console.WriteLine("");
         }
 
