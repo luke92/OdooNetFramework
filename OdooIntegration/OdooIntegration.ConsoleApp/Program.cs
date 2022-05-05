@@ -984,8 +984,6 @@ namespace OdooIntegration.ConsoleApp
         {
             var repoInvoiceV12 = new OdooRepository<AccountInvoiceOdooModel>(odooClient.Config);            
             var repoTaxes = new OdooRepository<AccountTaxOdooModel>(odooClient.Config);
-            var repoInvoiceTaxes = new OdooRepository<AccountInvoiceTaxOdooModel>(odooClient.Config);
-            var repoInvoiceLine = new OdooRepository<AccountInvoiceLineOdooModel>(odooClient.Config);
             var repoAccount = new OdooRepository<AccountAccountOdooModel>(odooClient.Config);
 
             var invoice = await OdooHelper.GetAsync(repoInvoiceV12, invoiceId);
@@ -994,10 +992,10 @@ namespace OdooIntegration.ConsoleApp
             await PrintAccountAsync(repoAccount, invoice.AccountId);    
 
             Console.WriteLine("Invoice Lines");
-            foreach (var line in invoice.InvoiceLineIds)
+            var invoiceLines = await OdooHelper.GetInvoiceLinesAsync(odooClient, invoiceId);
+            foreach (var invoiceLine in invoiceLines)
             {
-                Console.WriteLine("Invoice Line ID: " + line);
-                var invoiceLine = await OdooHelper.GetAsync(repoInvoiceLine, line);
+                Console.WriteLine("Invoice Line ID: " + invoiceLine.Id);
                 Console.WriteLine(JsonConvert.SerializeObject(invoiceLine));
 
                 if (invoiceLine != null)
@@ -1013,11 +1011,11 @@ namespace OdooIntegration.ConsoleApp
                 }                
             }
 
-            Console.WriteLine("Invoice Taxes");            
-            foreach (var tax in invoice.TaxLineIds)
+            Console.WriteLine("Invoice Taxes");
+            var invoiceTaxes = await OdooHelper.GetInvoiceTaxesAsync(odooClient, invoiceId);
+            foreach (var taxLine in invoiceTaxes)
             {
-                Console.WriteLine("Invoice Tax ID: " + tax);
-                var taxLine = await OdooHelper.GetAsync(repoInvoiceTaxes, tax);
+                Console.WriteLine("Invoice Tax ID: " + taxLine.Id);
                 Console.WriteLine(JsonConvert.SerializeObject(taxLine));
             }
         }

@@ -324,6 +324,24 @@ namespace OdooIntegration.ConsoleApp.Helpers
             return list;
         }
 
+        public async static Task<AccountInvoiceLineOdooModel[]> GetInvoiceLinesAsync(OdooClient odooClient, long invoiceId, long? companyId = null)
+        {
+            var repository = new OdooRepository<AccountInvoiceLineOdooModel>(odooClient.Config);
+            var query = GetQuery(repository, companyId);
+            query = query.Where(x => x.InvoiceId, PortaCapena.OdooJsonRpcClient.Consts.OdooOperator.EqualsTo, invoiceId);
+            var results = await query.ToListAsync();
+            return results.Value;
+        }
+
+        public async static Task<AccountInvoiceTaxOdooModel[]> GetInvoiceTaxesAsync(OdooClient odooClient, long invoiceId, long? companyId = null)
+        {
+            var repository = new OdooRepository<AccountInvoiceTaxOdooModel>(odooClient.Config);
+            var query = GetQuery(repository, companyId);
+            query = query.Where(x => x.InvoiceId, PortaCapena.OdooJsonRpcClient.Consts.OdooOperator.EqualsTo, invoiceId);
+            var results = await query.ToListAsync();
+            return results.Value;
+        }
+
         private static OdooQueryBuilder<T> GetQueryId<T>(OdooRepository<T> repository, long id) where T : IOdooModel, new()
         {
             var query = repository.Query();
